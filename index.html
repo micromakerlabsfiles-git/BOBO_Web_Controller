@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BOBO 2.0 Control Center</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --bg: #0b0f14;
+  --card: #151b23;
+  --accent: #00ffd5;
+  --danger: #ff4757;
+  --text: #e8f0f2;
+  --muted: #9aa4af;
+  --success: #2ed573;
+  --save-eye: #f0932b;
+}
+
+* { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; transition: all 0.2s ease; }
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #121a24, #06080c);
+  color: var(--text);
+  padding: 20px;
+  min-height: 100vh;
+}
+
+h2 {
+  margin: 0 0 15px;
+  color: var(--accent);
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 8px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* BUTTONS */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00ffd5, #00b3ff);
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+button:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+button.secondary {
+  background: #2a343f;
+  color: var(--text);
+}
+
+button.danger {
+  background: var(--danger);
+  color: white;
+}
+
+button.save-eye {
+  background: linear-gradient(135deg, #f0932b, #ffbe76);
+  color: #000;
+}
+
+/* INPUTS */
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #0e141b;
+  color: var(--text);
+  outline: none;
+}
+
+input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 255, 213, 0.1);
+}
+
+label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.range-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.range-group input {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+/* LOG */
+.log {
+  height: 200px;
+  background: #000;
+  color: var(--success);
+  font-family: 'Consolas', monospace;
+  font-size: 0.85rem;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-y: auto;
+  border: 1px solid #333;
+  white-space: pre-wrap;
+}
+
+/* STATUS INDICATOR */
+.status {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #444;
+  margin-right: 8px;
+}
+.status.connected { background: var(--success); box-shadow: 0 0 10px var(--success); }
+
+/* GRID HELPER */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+  <h2><span id="status-dot" class="status"></span>Connection</h2>
+  <div class="grid-2">
+    <button onclick="connect()">🔌 Connect</button>
+    <button class="secondary" onclick="disconnect()">❌ Close</button>
+  </div>
+  <button class="danger" onclick="sendCmd('REBOOT')">🔄 Reboot Device</button>
+  <button onclick="saveAll()" style="margin-top:15px; background: linear-gradient(135deg, #2ed573, #26c281);">💾 Save WiFi & Time</button>
+</div>
+
+<div class="card">
+  <h2>World Clock Setup</h2>
+  <label>Zone 1 (Left Side)</label>
+  <div class="grid-2">
+    <select id="tz1">
+      </select>
+    <button onclick="setZone(1)">Set Zone 1</button>
+  </div>
+
+  <label style="margin-top:10px">Zone 2 (Right Side)</label>
+  <div class="grid-2">
+    <select id="tz2">
+      </select>
+    <button onclick="setZone(2)">Set Zone 2</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Eye Physics & Shape</h2>
+
+  <label>Pupil Direction (X / Y)</label>
+  <div class="range-group">
+    <input type="range" min="-10" max="10" value="0" id="px" oninput="updateEye()">
+    <input type="range" min="-10" max="10" value="0" id="py" oninput="updateEye()">
+  </div>
+
+  <label>Eye Position (X / Y)</label>
+  <div class="range-group">
+    <input type="range" min="-10" max="10" value="0" id="ex" oninput="updateEyePos()">
+    <input type="range" min="-10" max="10" value="0" id="ey" oninput="updateEyePos()">
+  </div>
+
+  <label>Eye Size (Width / Height)</label>
+  <div class="range-group">
+    <input type="range" min="10" max="60" value="36" id="ew" oninput="updateEyeSize()">
+    <input type="range" min="10" max="60" value="36" id="eh" oninput="updateEyeSize()">
+  </div>
+
+  <label>Round Edges (Radius)</label>
+  <input type="range" min="0" max="20" value="8" id="er" oninput="updateEyeRadius()">
+
+  <div class="grid-2">
+    <button onclick="sendCmd('BLINK:1')">😉 Blink</button>
+    <button class="save-eye" onclick="saveEyes()">💾 Save Eye Shape</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Network & API</h2>
+  <label>WiFi Network (SSID)</label>
+  <input id="ssid" placeholder="Enter WiFi Name">
+  
+  <label>WiFi Password</label>
+  <input id="pass" type="password" placeholder="Enter WiFi Password">
+  
+  <div class="grid-2">
+    <button onclick="send('WIFI_SSID', ssid.value)">Set SSID</button>
+    <button onclick="send('WIFI_PASS', pass.value)">Set Pass</button>
+  </div>
+
+  <label style="margin-top:10px">Weather Location</label>
+  <div class="grid-2">
+    <input id="city" placeholder="City (e.g. London)">
+    <button onclick="send('CITY', city.value)">Set City</button>
+  </div>
+  
+  <label>OpenWeather API Key</label>
+  <input id="apikey" type="password" placeholder="Paste API Key">
+  <button onclick="send('APIKEY', apikey.value)">Set Key</button>
+</div>
+
+<div class="card">
+  <h2>Live Control</h2>
+  <label>Expression</label>
+  <select id="mood" onchange="send('MOOD', this.value)">
+    <option value="0">Normal</option>
+    <option value="1">Happy</option>
+    <option value="2">Surprised</option>
+    <option value="3">Sleepy</option>
+    <option value="4">Angry</option>
+    <option value="5">Sad</option>
+    <option value="6">Excited</option>
+    <option value="7">Love</option>
+    <option value="8">Suspicious</option>
+  </select>
+
+  <label>Current Page</label>
+  <select id="page" onchange="send('PAGE', this.value)">
+    <option value="0">Eyes Only</option>
+    <option value="1">Digital Clock</option>
+    <option value="2">Weather Card</option>
+    <option value="3">World Clock</option>
+    <option value="4">3-Day Forecast</option>
+  </select>
+  
+  <label style="margin-top:10px">Screen Brightness</label>
+  <input type="range" min="1" max="255" value="255" id="br" onchange="send('BRIGHT', this.value)">
+</div>
+
+<div class="card" style="grid-column: 1 / -1;">
+  <h2>Serial Monitor</h2>
+  <div class="log" id="log">Waiting for connection...</div>
+  <button class="secondary" onclick="document.getElementById('log').textContent=''">Clear Log</button>
+</div>
+
+</div>
+
+<script>
+// --- TIMEZONE DATA ---
+const timezones = [
+  { name: "Los Angeles", off: -28800 },
+  { name: "Denver",      off: -25200 },
+  { name: "Chicago",     off: -21600 },
+  { name: "New York",    off: -18000 },
+  { name: "Sao Paulo",   off: -10800 },
+  { name: "London",      off: 0 },
+  { name: "Paris",       off: 3600 },
+  { name: "Berlin",      off: 3600 },
+  { name: "Cairo",       off: 7200 },
+  { name: "Moscow",      off: 10800 },
+  { name: "Dubai",       off: 14400 },
+  { name: "Karachi",     off: 18000 },
+  { name: "Mumbai",      off: 19800 },
+  { name: "Dhaka",       off: 21600 },
+  { name: "Bangkok",     off: 25200 },
+  { name: "Singapore",   off: 28800 },
+  { name: "Hong Kong",   off: 28800 },
+  { name: "Shanghai",    off: 28800 },
+  { name: "Tokyo",       off: 32400 },
+  { name: "Seoul",       off: 32400 },
+  { name: "Sydney",      off: 39600 },
+  { name: "Auckland",    off: 46800 },
+  { name: "Honolulu",    off: -36000 },
+  { name: "Anchorage",   off: -32400 },
+  { name: "UTC",         off: 0 }
+];
+
+function initTimezones() {
+  const sel1 = document.getElementById('tz1');
+  const sel2 = document.getElementById('tz2');
+  
+  timezones.forEach(tz => {
+    // Format offset nicely
+    const h = Math.floor(tz.off / 3600);
+    const m = Math.abs((tz.off % 3600) / 60);
+    const sign = h >= 0 ? "+" : "";
+    const label = `(UTC${sign}${h}:${m < 10 ? '0'+m : m}) ${tz.name}`;
+
+    let opt1 = document.createElement('option');
+    opt1.value = tz.name + "," + tz.off;
+    opt1.text = label;
+    if(tz.name === "New York") opt1.selected = true;
+    sel1.appendChild(opt1);
+
+    let opt2 = document.createElement('option');
+    opt2.value = tz.name + "," + tz.off;
+    opt2.text = label;
+    if(tz.name === "Tokyo") opt2.selected = true;
+    sel2.appendChild(opt2);
+  });
+}
+
+function setZone(num) {
+  const sel = document.getElementById('tz' + num);
+  send('Z' + num + '_SET', sel.value);
+}
+
+// --- STANDARD SERIAL LOGIC ---
+let port, writer, reader;
+
+// Logger
+function log(t, type="rx"){
+  const l = document.getElementById('log');
+  const time = new Date().toLocaleTimeString().split(' ')[0];
+  const prefix = type === "tx" ? ">> " : "<< ";
+  l.textContent += `[${time}] ${prefix}${t}\n`;
+  l.scrollTop = l.scrollHeight;
+}
+
+// Connection
+async function connect(){
+  try {
+    port = await navigator.serial.requestPort();
+    await port.open({baudRate: 115200});
+    
+    // Setup streams
+    const textEncoder = new TextEncoderStream();
+    const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+    writer = textEncoder.writable.getWriter();
+    
+    const textDecoder = new TextDecoderStream();
+    const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+    reader = textDecoder.readable.getReader();
+
+    document.getElementById('status-dot').classList.add('connected');
+    log("CONNECTED", "sys");
+    readLoop();
+  } catch(e) {
+    log("ERROR: " + e, "sys");
+  }
+}
+
+async function disconnect(){
+  if(reader) { await reader.cancel(); reader = null; }
+  if(writer) { await writer.close(); writer = null; }
+  if(port) { await port.close(); port = null; }
+  document.getElementById('status-dot').classList.remove('connected');
+  log("DISCONNECTED", "sys");
+}
+
+async function readLoop(){
+  while(true){
+    const {value, done} = await reader.read();
+    if(done) break;
+    if(value.trim()) log(value.trim());
+  }
+}
+
+// Sending Logic
+async function sendRaw(cmd){
+  if(!writer) {
+    alert("Connect first!");
+    return;
+  }
+  await writer.write(cmd + "\n");
+  log(cmd, "tx");
+}
+
+function send(k, v){
+  sendRaw(`${k}:${v}`);
+}
+
+function sendCmd(cmd){
+  sendRaw(cmd);
+}
+
+// --- SAVE HANDLERS ---
+
+// 1. Save WiFi, API, and Time Settings
+function saveAll(){
+  setTimeout(() => send('WIFI_SSID', document.getElementById('ssid').value), 100);
+  setTimeout(() => send('WIFI_PASS', document.getElementById('pass').value), 300);
+  setTimeout(() => send('CITY', document.getElementById('city').value), 500);
+  setTimeout(() => send('APIKEY', document.getElementById('apikey').value), 700);
+  
+  // Save Zones
+  setTimeout(() => setZone(1), 900);
+  setTimeout(() => setZone(2), 1100);
+  
+  // Final Save Command
+  setTimeout(() => sendRaw('SAVE'), 1300);
+  
+  const btn = event.target;
+  const originalText = btn.innerText;
+  btn.innerText = "Saved WiFi & Time!";
+  setTimeout(() => btn.innerText = originalText, 2500);
+}
+
+// 2. Save Eye Shape Separately
+function saveEyes(){
+  sendCmd('EYE_SAVE');
+  
+  const btn = event.target;
+  const originalText = btn.innerText;
+  btn.innerText = "Shape Saved!";
+  setTimeout(() => btn.innerText = originalText, 2000);
+}
+
+// Throttled Sliders to prevent serial spam
+let timeout;
+function debounce(func, delay) {
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+const updateEye = debounce(() => {
+  send('EYE', document.getElementById('px').value + ',' + document.getElementById('py').value);
+}, 50);
+
+const updateEyePos = debounce(() => {
+  send('EYE_POS', document.getElementById('ex').value + ',' + document.getElementById('ey').value);
+}, 100);
+
+const updateEyeSize = debounce(() => {
+  send('EYE_SIZE', document.getElementById('ew').value + ',' + document.getElementById('eh').value);
+}, 100);
+
+const updateEyeRadius = debounce(() => {
+  send('EYE_RADIUS', document.getElementById('er').value);
+}, 100);
+
+// Initialize Timezones on Load
+initTimezones();
+
+</script>
+</body>
+</html>
