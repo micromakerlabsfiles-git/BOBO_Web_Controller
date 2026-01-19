@@ -83,7 +83,7 @@ Navigate to **Sketch > Include Library > Manage Libraries**, then search for and
 
 ### Step D: Upload
 1.  Connect your ESP32 to your PC.
-2.  Select your board: **Tools > Board > DOIT ESP32 DEVKIT V1**.
+2.  Select your board: **Tools > Board > MakerGO ESP32 C3 SuperMini**.
 3.  Select the correct Port: **Tools > Port**.
 4.  Click **Upload** (Arrow icon).
 
