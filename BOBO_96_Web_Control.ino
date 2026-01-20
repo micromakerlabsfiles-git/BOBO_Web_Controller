@@ -10,7 +10,7 @@
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <Fonts/FreeSans9pt7b.h>
 #include <Preferences.h>
-#include "boot_sequence.h"
+#include "boot_sequence_spamworld.h"
 
 Preferences prefs;
 
@@ -42,6 +42,17 @@ int storedEyeR = 8;    // Radius
 float storedEyeX = 0;  // Offset X
 float storedEyeY = 0;  // Offset Y
 
+// --- TIMING VARIABLES ---
+unsigned long lastWeatherUpdate = 0;
+unsigned long weatherInterval = 7200000; // 2 HOURS (Fixed per request)
+
+unsigned long lastPageSwitch = 0;
+unsigned long currentPageInterval = 25000; // Starts with Eyes duration
+
+// CONSTANTS FOR DURATIONS
+const long DURATION_EYES = 25000; // 25 Seconds for Eyes
+const long DURATION_INFO = 5000;  // 5 Seconds for Clock/Weather (Change this if needed)
+
 // ==================================================
 // WIFI (RUNTIME, NON-BLOCKING)
 // ==================================================
@@ -56,8 +67,6 @@ unsigned long lastWifiAttempt = 0;
 String city = "";
 const char* countryCode = "IN";
 String apiKey = "";
-
-unsigned long lastWeatherUpdate = 0;
 float temperature = 0.0;
 float feelsLike = 0.0;
 int humidity = 0;
@@ -103,8 +112,6 @@ unsigned long pressStartTime = 0;
 bool isLongPressHandled = false;
 const unsigned long LONG_PRESS_TIME = 800;
 const unsigned long DOUBLE_TAP_DELAY = 300;
-
-unsigned long lastPageSwitch = 0;
 const unsigned long PAGE_INTERVAL = 8000;
 
 // ==================================================
@@ -772,34 +779,43 @@ void drawClock() {
 }
 
 void drawWeatherCard() {
-  if(!wifiEnabled || WiFi.status()!=WL_CONNECTED){
-    display.setFont(NULL);
-    display.setCursor(0,0);
-    display.print("No WiFi");
-    return;
-  }
+  // 1. Check if we have data (Offline check)
+  // We removed the "WiFi.status()" check so it shows cached data
+  
+  // 2. Icon Logic
+  display.drawBitmap(96, 0, getBigIcon(weatherMain), 32, 32, SSD1306_WHITE);
 
-  display.drawBitmap(96,0,getBigIcon(weatherMain),32,32,SSD1306_WHITE);
-
+  // 3. City Name
   display.setFont(&FreeSansBold9pt7b);
-  String c=city; c.toUpperCase();
-  display.setCursor(0,14);
+  String c = city; 
+  c.toUpperCase();
+  display.setCursor(0, 14);
   display.print(c);
 
+  // 4. Temperature
   display.setFont(&FreeSansBold18pt7b);
-  int tempInt=(int)temperature;
-  display.setCursor(0,48);
-  display.print(tempInt);
-  display.fillCircle(40,26,4,SSD1306_WHITE);
+  int tempInt = (int)temperature; 
+  display.setCursor(0, 48);
+  
+  // Basic check: if temp is 0 and we are truly offline/empty
+  if (tempInt == 0 && weatherMain == "Offline") {
+    display.print("--");
+  } else {
+    display.print(tempInt);
+  }
+  display.fillCircle(40, 26, 4, SSD1306_WHITE);
 
+  // 5. Humidity
   display.setFont(NULL);
-  display.drawBitmap(88,32,bmp_tiny_drop,8,8,SSD1306_WHITE);
-  display.setCursor(100,32);
+  display.drawBitmap(88, 32, bmp_tiny_drop, 8, 8, SSD1306_WHITE);
+  display.setCursor(100, 32);
   display.print(humidity);
   display.print("%");
 
-  display.setCursor(0,55);
-  display.print(weatherDesc);
+  // 6. Description
+  display.setCursor(0, 55);
+  // FIX: Use 'weatherDesc' (your variable) not 'weatherDescription'
+  display.print(weatherDesc); 
 }
 
 void drawWorldClock() {
@@ -915,39 +931,75 @@ void setup() {
 // LOOP
 // ==================================================
 void loop() {
-  handleWifi();
+  // -------------------------------------------------
+  // 1. HANDLE WEB/SERIAL COMMANDS
+  // -------------------------------------------------
+  handleWifi(); 
+  
   while(Serial.available()){
-    char c=Serial.read();
-    if(c=='\n'){
-      handleSerialCommand(serialBuffer);
-      serialBuffer="";
-    } else if(c!='\r'){
-      serialBuffer+=c;
+    char c = Serial.read();
+    if(c == '\n'){
+      handleSerialCommand(serialBuffer); // Correct Name
+      serialBuffer = "";
+    } else if(c != '\r'){
+      serialBuffer += c;
     }
   }
 
-  unsigned long now=millis();
-  handleTouch();
-  if(wifiEnabled && WiFi.status()==WL_CONNECTED &&
-     now-lastWeatherUpdate>600000){
-    getWeatherAndForecast();
-    lastWeatherUpdate=now;
+  // -------------------------------------------------
+  // 2. WEATHER UPDATE LOGIC (Every 2 Hours)
+  // -------------------------------------------------
+  unsigned long now = millis();
+  
+  // Check if 2 hours (7200000 ms) passed
+  if(wifiEnabled && WiFi.status() == WL_CONNECTED && (now - lastWeatherUpdate > weatherInterval)) {
+     getWeatherAndForecast(); // Correct Name
+     lastWeatherUpdate = now;
+     Serial.println("Weather Auto-Update");
   }
 
-  if(currentPage<3 && now-lastPageSwitch>PAGE_INTERVAL){
+  // -------------------------------------------------
+  // 3. PAGE SWITCHING LOGIC (Dynamic Timing)
+  // -------------------------------------------------
+  handleTouch(); 
+
+  // Decide how long to wait based on current page
+  if (currentPage == 0) {
+    currentPageInterval = DURATION_EYES; // 25 seconds
+  } else {
+    currentPageInterval = DURATION_INFO; // 5 seconds
+  }
+
+  if (currentPage < 3 && (now - lastPageSwitch > currentPageInterval)) {
     currentPage++;
-    if(currentPage>2) currentPage=0;
-    lastPageSwitch=now;
-    lastSaccade=0;
+    // Cycle: 0 -> 1 -> 2 -> 0... (Skipping 3/4 unless manually tapped)
+    if (currentPage > 2) currentPage = 0; 
+    
+    lastPageSwitch = now;
+    lastSaccade = 0; // Reset eye movement timer
   }
 
+  // -------------------------------------------------
+  // 4. DRAWING LOGIC
+  // -------------------------------------------------
   display.clearDisplay();
+  
   switch(currentPage){
-    case 0: drawEmoPage(); break;
-    case 1: drawClock(); break;
-    case 2: drawWeatherCard(); break;
-    case 3: drawWorldClock(); break;
-    case 4: drawForecastPage(); break;
+    case 0: 
+      drawEmoPage();       // Correct Name (Handles physics + drawing)
+      break;
+    case 1: 
+      drawClock();         // Correct Name
+      break;
+    case 2: 
+      drawWeatherCard();   // Correct Name
+      break;
+    case 3: 
+      drawWorldClock();    // Correct Name
+      break;
+    case 4: 
+      drawForecastPage();  // Correct Name
+      break;
   }
   display.display();
 }
