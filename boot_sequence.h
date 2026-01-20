@@ -176,11 +176,11 @@ void runBootSequence(Adafruit_SSD1306 *display) {
   display->setTextColor(SSD1306_WHITE);
 
   // --- SCENE 1: Hey Bro... ---
-  display->setFont(&FreeMonoBoldOblique9pt7b);
-  typeText(display, "Hey Bro", 0, 12);
+  display->setFont(&FreeSansBoldOblique9pt7b);
+  typeText(display, "Hey", 0, 12);
   delay(300);
-  typeText(display, "\nWelcome to", 0, 18); // Newline handled by setCursor logic usually, but manual Y is safer for gfx
-  typeText(display, "\nSpam World", 0, 42); 
+  typeText(display, "\nBooting", 0, 18); // Newline handled by setCursor logic usually, but manual Y is safer for gfx
+  typeText(display, "\nBOBO 2.1 OS", 0, 42); 
   delay(1500);
 
     // --- ANIMATION: Gears ---
@@ -191,9 +191,8 @@ void runBootSequence(Adafruit_SSD1306 *display) {
 
   // --- SCENE 2: Your car... ---
   display->clearDisplay();
-  display->setFont(&FreeSerifBoldItalic9pt7b);
-  typeText(display, "Your car is", 0, 25);
-  typeText(display, "\nmore powerful", 0, 27);
+  display->setFont(&FreeSansBoldOblique9pt7b);
+  typeText(display, "Loading...", 0, 26);
   delay(1000);
 
   // --- ANIMATION: Power Off ---
@@ -204,8 +203,8 @@ void runBootSequence(Adafruit_SSD1306 *display) {
   display->clearDisplay();
   display->setFont(&FreeSansBoldOblique9pt7b);
   // Center text approximation
-  typeText(display, "Turn on", 0, 25);
-  typeText(display, "the banger", 0, 45);
+  typeText(display, "Here We", 0, 25);
+  typeText(display, "Go", 0, 45);
   delay(1000);
 
 
@@ -217,5 +216,6 @@ void runBootSequence(Adafruit_SSD1306 *display) {
   // --- TRANSITION: FADE TO DARK -> EYES OPEN ---
   animateEyesOpening(display);
 }
+
 
 #endif
