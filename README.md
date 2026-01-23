@@ -57,7 +57,8 @@ Connect your components to the ESP32 using the following pin mapping:
 
 **Circuit Diagram**
 
-<img width="1280" height="720" alt="Circuit Diagram" src="https://github.com/user-attachments/assets/913bf57c-f74f-42cd-90d8-a924129be5ab" />
+![Slide1](https://github.com/user-attachments/assets/33e228d0-2e5d-4404-971a-137fec8e2aaf)
+
 
 ---
 
