@@ -34,7 +34,7 @@ To run BOBO 2.1, you will need the following components:
 
 | Component | Description |
 | :--- | :--- |
-| **Microcontroller** | ESP32 C3 SuperMini Development Board - [Know more about ESp32 C3 SuperMini](https://randomnerdtutorials.com/getting-started-esp32-c3-super-mini/) |
+| **Microcontroller** | ESP32 C3 SuperMini Development Board - [Know more about board](https://randomnerdtutorials.com/getting-started-esp32-c3-super-mini/) |
 | **Display** | 0.96" I2C OLED Display (SSD1306 driver) |
 | **Touch Sensor** | TTP223 Capacitive Touch Sensor |
 | **Connectivity** | Micro-USB Cable (Data + Power) |
@@ -55,7 +55,8 @@ Connect your components to the ESP32 using the following pin mapping:
 | **Touch Sensor** | VCC | `3.3V` or `5V` |
 | **Touch Sensor** | GND | `GND` |
 
-Circuit Diagram
+**Circuit Diagram**
+
 <img width="1280" height="720" alt="Circuit Diagram" src="https://github.com/user-attachments/assets/913bf57c-f74f-42cd-90d8-a924129be5ab" />
 
 ---
