@@ -34,7 +34,7 @@ To run BOBO 2.1, you will need the following components:
 
 | Component | Description |
 | :--- | :--- |
-| **Microcontroller** | ESP32 Development Board (e.g., ESP32 DevKit V1) |
+| **Microcontroller** | ESP32 C3 SuperMini Development Board - [Know more about ESp32 C3 SuperMini](https://randomnerdtutorials.com/getting-started-esp32-c3-super-mini/) |
 | **Display** | 0.96" I2C OLED Display (SSD1306 driver) |
 | **Touch Sensor** | TTP223 Capacitive Touch Sensor |
 | **Connectivity** | Micro-USB Cable (Data + Power) |
@@ -54,6 +54,9 @@ Connect your components to the ESP32 using the following pin mapping:
 | **Touch Sensor** | I/O | `GPIO 1` |
 | **Touch Sensor** | VCC | `3.3V` or `5V` |
 | **Touch Sensor** | GND | `GND` |
+
+Circuit Diagram
+<img width="1280" height="720" alt="Circuit Diagram" src="https://github.com/user-attachments/assets/913bf57c-f74f-42cd-90d8-a924129be5ab" />
 
 ---
 
@@ -107,7 +110,7 @@ To enable weather features, you need a free API Key from OpenWeatherMap.
 The `BOBO_Web_Controller.html` file acts as your control panel. It utilizes **Web Serial API**, allowing the browser to communicate directly with your USB devices.
 
 ### How to Connect
-1.  Open `BOBO_Web_Controller.html` in **Chrome, Edge, or Opera** (Firefox is not supported).
+1.  Open [BOBO_Web_Controller](https://micromakerlabsfiles-git.github.io/BOBO_Web_Controller/) in **Chrome, Edge, or Opera** (Firefox is not supported).
 2.  Connect the ESP32 via USB.
 3.  Click the **🔌 Connect** button on the page.
 4.  Select your device (usually "USB UART" or "CP210x") and click **Connect**. The status dot will turn Green.
