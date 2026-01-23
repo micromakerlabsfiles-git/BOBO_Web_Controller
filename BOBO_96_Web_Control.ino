@@ -10,7 +10,7 @@
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <Fonts/FreeSans9pt7b.h>
 #include <Preferences.h>
-#include "boot_sequence_spamworld.h"
+#include "boot_sequence.h"
 
 Preferences prefs;
 
