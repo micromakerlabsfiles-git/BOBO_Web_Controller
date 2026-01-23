@@ -11,7 +11,7 @@ This document covers hardware assembly, software installation, API generation, a
 - [Hardware Requirements](#-hardware-requirements)
 - [Wiring Guide](#-wiring-guide)
 - [Software Setup](#-software-setup-installation-guide)
-- [API Generation (Weather)](#-api-generation-getting-weather-data)
+- [Weather API Generation](#weather-api)
 - [Web Control Center](#-using-the-web-control-center)
 - [Customizing Boot Animations](#-update-the-boot-animations)
 
@@ -93,8 +93,8 @@ Navigate to **Sketch > Include Library > Manage Libraries**, then search for and
 4.  Click **Upload** (Arrow icon).
 
 ---
-
-## ☁️ API Generation (Getting Weather Data)
+<a id="weather-api"></a>
+## ☁️ API Generation For Getting Weather Data
 
 To enable weather features, you need a free API Key from OpenWeatherMap.
 
