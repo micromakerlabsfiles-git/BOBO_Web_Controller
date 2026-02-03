@@ -1,0 +1,13 @@
+{
+  "name": "BOBO 2.2 Personality Engine",
+  "version": "2.2.0",
+  "new_install_prompt_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        { "path": "BOBO_22_96_Web_Control.ino.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BOBO 2.2 Web Control Center</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+
+<style>
+:root { --bg: #0b0f14; --card: #151b23; --accent: #00ffd5; --danger: #ff4757; --text: #e8f0f2; --muted: #9aa4af; --success: #2ed573; --save-eye: #f0932b; }
+* { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; transition: all 0.2s ease; }
+body { margin: 0; background: radial-gradient(circle at top, #121a24, #06080c); color: var(--text); padding: 20px; min-height: 100vh; }
+h2 { margin: 0 0 15px; color: var(--accent); font-size: 1.1rem; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+.container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.card { background: var(--card); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+button { width: 100%; padding: 12px; margin-top: 5px; border: none; border-radius: 8px; background: linear-gradient(135deg, #00ffd5, #00b3ff); color: #000; font-weight: 700; cursor: pointer; position: relative; overflow: hidden; }
+button:active { transform: scale(0.98); opacity: 0.9; }
+button.secondary { background: #2a343f; color: var(--text); }
+button.danger { background: var(--danger); color: white; }
+button.save-eye { background: linear-gradient(135deg, #f0932b, #ffbe76); color: #000; }
+input, select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #333; background: #0e141b; color: var(--text); outline: none; }
+input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0, 255, 213, 0.1); }
+label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: block; }
+.range-group { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.range-group input { margin-bottom: 0; flex: 1; }
+.log { height: 100px; background: #000; color: var(--success); font-family: 'Consolas', monospace; font-size: 0.85rem; padding: 10px; border-radius: 8px; overflow-y: auto; border: 1px solid #333; white-space: pre-wrap; }
+.status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #444; margin-right: 8px; }
+.status.connected { background: var(--success); box-shadow: 0 0 10px var(--success); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* 2. Flasher Specific Styles */
+.card.flasher { border: 1px dashed var(--accent); background: rgba(0, 255, 213, 0.05); text-align: center; }
+esp-web-install-button { --esp-tools-button-color: var(--accent); }
+
+.toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; }
+.toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; margin-bottom: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 20px; }
+.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--accent); }
+input:checked + .slider:before { transform: translateX(20px); }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+  <h2><span id="status-dot" class="status"></span>Connection</h2>
+  <div class="grid-2">
+    <button onclick="connect()">🔌 Connect</button>
+    <button class="secondary" onclick="disconnect()">❌ Close</button>
+  </div>
+  <button class="danger" onclick="sendCmd('REBOOT')">🔄 Reboot Device</button>
+  <button onclick="saveAll()" style="margin-top:15px; background: linear-gradient(135deg, #2ed573, #26c281);">💾 Save ALL Settings</button>
+  <button onclick="sendCmd('GET_SETTINGS')" style="background:#444; margin-top:5px;">📥 Sync from BOBO</button>
+</div>
+
+<div class="card flasher">
+  <h2>🚀 Firmware Update</h2>
+  <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 10px;">Update BOBO to the latest version. <br><b>Important:</b> Click "Close" Connection above first!</p>
+  <esp-web-install-button manifest="manifest.json">
+    <button slot="activate">Update BOBO Firmware</button>
+    <span slot="unsupported">Flash not supported on this browser (Try Chrome).</span>
+  </esp-web-install-button>
+</div>
+
+<div class="card">
+  <h2>👁️ Eye Physics & Shape</h2>
+  <label>Pupil Look (X / Y)</label>
+  <div class="range-group">
+    <input type="range" min="-10" max="10" value="0" id="px" oninput="updateEye()">
+    <input type="range" min="-10" max="10" value="0" id="py" oninput="updateEye()">
+  </div>
+  <label>Eye Position (X / Y)</label>
+  <div class="range-group">
+    <input type="range" min="-10" max="10" value="0" id="ex" oninput="updateEyePos()">
+    <input type="range" min="-10" max="10" value="0" id="ey" oninput="updateEyePos()">
+  </div>
+  <label>Size (W / H)</label>
+  <div class="range-group">
+    <input type="range" min="10" max="60" value="36" id="ew" oninput="updateEyeSize()">
+    <input type="range" min="10" max="60" value="36" id="eh" oninput="updateEyeSize()">
+  </div>
+  <label>Radius</label>
+  <input type="range" min="0" max="20" value="8" id="er" oninput="updateEyeRadius()">
+  <div class="grid-2">
+    <button onclick="sendCmd('BLINK:1')">😉 Blink</button>
+    <button class="save-eye" onclick="saveEyes()">💾 Save Shape</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🎮 Live Control</h2>
+  <label>Expression</label>
+  <select id="mood" onchange="send('MOOD', this.value)">
+    <option value="0">Normal</option> <option value="1">Happy</option> <option value="2">Surprised</option>
+    <option value="3">Sleepy</option> <option value="4">Angry</option> <option value="5">Sad</option>
+    <option value="6">Excited</option> <option value="7">Love</option> <option value="8">Suspicious</option>
+  </select>
+  <label>Force Page</label>
+  <select id="page" onchange="send('PAGE', this.value)">
+    <option value="0">Eyes</option> <option value="1">Clock</option>
+    <option value="2">Weather</option> <option value="3">World Clock</option>
+    <option value="4">Forecast</option> <option value="5">Alarm View</option>
+    <option value="6">Alarm Set</option>
+  </select>
+  <label style="margin-top:10px">Brightness</label>
+  <input type="range" min="1" max="255" value="255" id="br" onchange="send('BRIGHT', this.value)">
+</div>
+
+<div class="card">
+  <h2>⏰ Alarm & Timers</h2>
+  <div class="toggle-row">
+    <span>Daily Alarm</span>
+    <label class="toggle-switch"><input type="checkbox" id="aOn"><span class="slider"></span></label>
+  </div>
+  <div class="grid-2">
+    <input type="number" id="aH" placeholder="Hour (0-23)">
+    <input type="number" id="aM" placeholder="Min (0-59)">
+  </div>
+  <button onclick="setAlarm()">Set Alarm Time</button>
+  <label style="margin-top:15px;">Countdown Timer</label>
+  <div class="grid-2">
+    <input type="number" id="tmr" value="10" placeholder="Minutes">
+    <button onclick="send('TIMER_SET', document.getElementById('tmr').value)">Set Timer</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🔊 Sound & Alerts</h2>
+  <div class="toggle-row">
+    <span>Touch Sound</span>
+    <label class="toggle-switch"><input type="checkbox" id="snd" onchange="send('SOUND', this.checked?1:0)" checked><span class="slider"></span></label>
+  </div>
+  <div class="toggle-row">
+    <span>Hourly Chime</span>
+    <label class="toggle-switch"><input type="checkbox" id="chm" onchange="send('CHIME', this.checked?1:0)" checked><span class="slider"></span></label>
+  </div>
+  <div class="toggle-row">
+    <span>Water Reminder</span>
+    <label class="toggle-switch"><input type="checkbox" id="wtr" onchange="send('WATER', this.checked?1:0)"><span class="slider"></span></label>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🚀 Boot Text</h2>
+  <input id="bt1" value="Booting" onchange="send('BOOT1', this.value)">
+  <input id="bt2" value="BOBO 2.2" onchange="send('BOOT2', this.value)">
+  <input id="bt3" value="Loading..." onchange="send('BOOT3', this.value)">
+  <input id="bt4" value="Here We Go" onchange="send('BOOT4', this.value)">
+</div>
+
+<div class="card">
+  <h2>Network & API</h2>
+  <input id="ssid" placeholder="WiFi Name"><input id="pass" type="password" placeholder="WiFi Password">
+  <div class="grid-2"><button onclick="send('WIFI_SSID', ssid.value)">Set SSID</button><button onclick="send('WIFI_PASS', pass.value)">Set Pass</button></div>
+  <input id="city" placeholder="City"><button onclick="send('CITY', city.value)">Set City</button>
+  <input id="apikey" type="password" placeholder="API Key"><button onclick="send('APIKEY', apikey.value)">Set Key</button>
+</div>
+
+<div class="card" style="grid-column: 1 / -1;">
+  <h2>Monitor</h2>
+  <div class="log" id="log">Waiting...</div>
+</div>
+
+</div>
+
+<script>
+const timezones = [
+  { name: "London", off: 0 }, { name: "Paris", off: 3600 }, { name: "Mumbai", off: 19800 },
+  { name: "Singapore", off: 28800 }, { name: "Tokyo", off: 32400 }, { name: "Sydney", off: 39600 }
+];
+
+let port, writer, reader;
+function log(t){ const l=document.getElementById('log'); l.textContent+=`>> ${t}\n`; l.scrollTop=l.scrollHeight; }
+
+async function connect(){
+  try {
+    port = await navigator.serial.requestPort();
+    await port.open({baudRate: 115200});
+    const te=new TextEncoderStream(); te.readable.pipeTo(port.writable); writer=te.writable.getWriter();
+    const td=new TextDecoderStream(); port.readable.pipeTo(td.writable); reader=td.readable.getReader();
+    document.getElementById('status-dot').classList.add('connected');
+    log("CONNECTED");
+    setTimeout(()=>sendCmd('GET_SETTINGS'), 1500);
+    readLoop();
+  } catch(e) { log(e); }
+}
+
+// 4. Update Disconnect Logic to release Serial Port
+async function disconnect(){ 
+  if(reader) await reader.cancel(); 
+  if(writer) await writer.close(); 
+  if(port) await port.close(); 
+  document.getElementById('status-dot').classList.remove('connected');
+  log("DISCONNECTED - Port free for Flashing.");
+}
+
+async function readLoop(){
+  while(true){ 
+    try {
+      const {value, done} = await reader.read(); 
+      if(done) break; 
+      if(value.trim()) { log(value.trim()); parseSettings(value.trim()); }
+    } catch(e) { break; }
+  }
+}
+
+function parseSettings(data) {
+    if(!data.startsWith("SET:")) return;
+    const parts = data.substring(4).split('=');
+    const key = parts[0]; const val = parts[1];
+    if(key=="WIFI_SSID") document.getElementById('ssid').value = val;
+    if(key=="APIKEY") document.getElementById('apikey').value = val;
+    if(key=="CITY") document.getElementById('city').value = val;
+    if(key=="SND") document.getElementById('snd').checked = (val == "1");
+    if(key=="WTR") document.getElementById('wtr').checked = (val == "1");
+}
+
+async function sendRaw(cmd){ if(!writer) return; await writer.write(cmd + "\n"); }
+function send(k, v){ sendRaw(`${k}:${v}`); }
+function sendCmd(cmd){ sendRaw(cmd); }
+
+function setAlarm() {
+    const h = document.getElementById('aH').value;
+    const m = document.getElementById('aM').value;
+    const on = document.getElementById('aOn').checked ? 1 : 0;
+    send('ALARM_SET', `${h},${m},${on}`);
+}
+
+function saveAll(){
+  send('WIFI_SSID', document.getElementById('ssid').value);
+  setTimeout(()=>sendRaw('SAVE'), 1000);
+}
+
+function saveEyes(){ sendCmd('EYE_SAVE'); }
+
+let timeout;
+function debounce(func, delay) { return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
+const updateEye = debounce(() => { send('EYE', document.getElementById('px').value + ',' + document.getElementById('py').value); }, 50);
+const updateEyePos = debounce(() => { send('EYE_POS', document.getElementById('ex').value + ',' + document.getElementById('ey').value); }, 100);
+const updateEyeSize = debounce(() => { send('EYE_SIZE', document.getElementById('ew').value + ',' + document.getElementById('eh').value); }, 100);
+const updateEyeRadius = debounce(() => { send('EYE_RADIUS', document.getElementById('er').value); }, 100);
+
+</script>
+</body>
+</html>
