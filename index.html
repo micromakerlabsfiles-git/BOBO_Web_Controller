@@ -5,6 +5,8 @@
 <title>BOBO 2.2 Web Control Center</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+
 <style>
 :root { --bg: #0b0f14; --card: #151b23; --accent: #00ffd5; --danger: #ff4757; --text: #e8f0f2; --muted: #9aa4af; --success: #2ed573; --save-eye: #f0932b; }
 * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; transition: all 0.2s ease; }
@@ -27,7 +29,10 @@ label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; lett
 .status.connected { background: var(--success); box-shadow: 0 0 10px var(--success); }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-/* TOGGLE SWITCHES */
+/* 2. Flasher Specific Styles */
+.card.flasher { border: 1px dashed var(--accent); background: rgba(0, 255, 213, 0.05); text-align: center; }
+esp-web-install-button { --esp-tools-button-color: var(--accent); }
+
 .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; }
 .toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; margin-bottom: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
@@ -51,6 +56,15 @@ input:checked + .slider:before { transform: translateX(20px); }
   <button class="danger" onclick="sendCmd('REBOOT')">🔄 Reboot Device</button>
   <button onclick="saveAll()" style="margin-top:15px; background: linear-gradient(135deg, #2ed573, #26c281);">💾 Save ALL Settings</button>
   <button onclick="sendCmd('GET_SETTINGS')" style="background:#444; margin-top:5px;">📥 Sync from BOBO</button>
+</div>
+
+<div class="card flasher">
+  <h2>🚀 Firmware Update</h2>
+  <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 10px;">Update BOBO to the latest version. <br><b>Important:</b> Click "Close" Connection above first!</p>
+  <esp-web-install-button manifest="manifest.json">
+    <button slot="activate">Update BOBO Firmware</button>
+    <span slot="unsupported">Flash not supported on this browser (Try Chrome).</span>
+  </esp-web-install-button>
 </div>
 
 <div class="card">
@@ -99,19 +113,16 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 <div class="card">
   <h2>⏰ Alarm & Timers</h2>
-  
   <div class="toggle-row">
     <span>Daily Alarm</span>
     <label class="toggle-switch"><input type="checkbox" id="aOn"><span class="slider"></span></label>
   </div>
-  
   <div class="grid-2">
     <input type="number" id="aH" placeholder="Hour (0-23)">
     <input type="number" id="aM" placeholder="Min (0-59)">
   </div>
   <button onclick="setAlarm()">Set Alarm Time</button>
-
-  <label style="margin-top:15px;">Countdown Timer (Triple Tap)</label>
+  <label style="margin-top:15px;">Countdown Timer</label>
   <div class="grid-2">
     <input type="number" id="tmr" value="10" placeholder="Minutes">
     <button onclick="send('TIMER_SET', document.getElementById('tmr').value)">Set Timer</button>
@@ -143,14 +154,6 @@ input:checked + .slider:before { transform: translateX(20px); }
 </div>
 
 <div class="card">
-  <h2>World Clock</h2>
-  <label>Zone 1 (Left)</label>
-  <div class="grid-2"><select id="tz1"></select><button onclick="setZone(1)">Set</button></div>
-  <label style="margin-top:10px">Zone 2 (Right)</label>
-  <div class="grid-2"><select id="tz2"></select><button onclick="setZone(2)">Set</button></div>
-</div>
-
-<div class="card">
   <h2>Network & API</h2>
   <input id="ssid" placeholder="WiFi Name"><input id="pass" type="password" placeholder="WiFi Password">
   <div class="grid-2"><button onclick="send('WIFI_SSID', ssid.value)">Set SSID</button><button onclick="send('WIFI_PASS', pass.value)">Set Pass</button></div>
@@ -167,23 +170,9 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 <script>
 const timezones = [
-  { name: "Los Angeles", off: -28800 }, { name: "Denver", off: -25200 }, { name: "Chicago", off: -21600 },
-  { name: "New York", off: -18000 }, { name: "Sao Paulo", off: -10800 }, { name: "London", off: 0 },
-  { name: "Paris", off: 3600 }, { name: "Cairo", off: 7200 }, { name: "Moscow", off: 10800 },
-  { name: "Dubai", off: 14400 }, { name: "Karachi", off: 18000 }, { name: "Mumbai", off: 19800 },
-  { name: "Dhaka", off: 21600 }, { name: "Bangkok", off: 25200 }, { name: "Singapore", off: 28800 },
-  { name: "Tokyo", off: 32400 }, { name: "Sydney", off: 39600 }
+  { name: "London", off: 0 }, { name: "Paris", off: 3600 }, { name: "Mumbai", off: 19800 },
+  { name: "Singapore", off: 28800 }, { name: "Tokyo", off: 32400 }, { name: "Sydney", off: 39600 }
 ];
-
-function initTimezones() {
-  const sel1 = document.getElementById('tz1');
-  const sel2 = document.getElementById('tz2');
-  timezones.forEach(tz => {
-    let opt1 = document.createElement('option'); opt1.value = tz.name + "," + tz.off; opt1.text = tz.name; sel1.appendChild(opt1);
-    let opt2 = document.createElement('option'); opt2.value = tz.name + "," + tz.off; opt2.text = tz.name; sel2.appendChild(opt2);
-  });
-}
-function setZone(num) { send('Z' + num + '_SET', document.getElementById('tz' + num).value); }
 
 let port, writer, reader;
 function log(t){ const l=document.getElementById('log'); l.textContent+=`>> ${t}\n`; l.scrollTop=l.scrollHeight; }
@@ -196,53 +185,39 @@ async function connect(){
     const td=new TextDecoderStream(); port.readable.pipeTo(td.writable); reader=td.readable.getReader();
     document.getElementById('status-dot').classList.add('connected');
     log("CONNECTED");
-    setTimeout(()=>sendCmd('GET_SETTINGS'), 1500); // Auto Sync Once
+    setTimeout(()=>sendCmd('GET_SETTINGS'), 1500);
     readLoop();
   } catch(e) { log(e); }
 }
 
-async function disconnect(){ if(reader)await reader.cancel(); if(writer)await writer.close(); if(port)await port.close(); }
+// 4. Update Disconnect Logic to release Serial Port
+async function disconnect(){ 
+  if(reader) await reader.cancel(); 
+  if(writer) await writer.close(); 
+  if(port) await port.close(); 
+  document.getElementById('status-dot').classList.remove('connected');
+  log("DISCONNECTED - Port free for Flashing.");
+}
 
 async function readLoop(){
   while(true){ 
-    const {value, done} = await reader.read(); 
-    if(done) break; 
-    if(value.trim()) {
-        log(value.trim());
-        parseSettings(value.trim());
-    }
+    try {
+      const {value, done} = await reader.read(); 
+      if(done) break; 
+      if(value.trim()) { log(value.trim()); parseSettings(value.trim()); }
+    } catch(e) { break; }
   }
 }
 
 function parseSettings(data) {
     if(!data.startsWith("SET:")) return;
     const parts = data.substring(4).split('=');
-    const key = parts[0];
-    const val = parts[1];
-    
+    const key = parts[0]; const val = parts[1];
     if(key=="WIFI_SSID") document.getElementById('ssid').value = val;
-    if(key=="WIFI_PASS") document.getElementById('pass').value = val;
     if(key=="APIKEY") document.getElementById('apikey').value = val;
     if(key=="CITY") document.getElementById('city').value = val;
-    if(key=="TIMER") document.getElementById('tmr').value = val;
-    if(key=="ALARM") {
-        const a = val.split(',');
-        document.getElementById('aH').value = a[0];
-        document.getElementById('aM').value = a[1];
-        document.getElementById('aOn').checked = (a[2] == "1");
-    }
     if(key=="SND") document.getElementById('snd').checked = (val == "1");
-    if(key=="CHM") document.getElementById('chm').checked = (val == "1");
     if(key=="WTR") document.getElementById('wtr').checked = (val == "1");
-    if(key=="EYE") {
-        const e = val.split(',');
-        document.getElementById('ex').value = e[0];
-        document.getElementById('ey').value = e[1];
-        document.getElementById('ew').value = e[2];
-        document.getElementById('eh').value = e[3];
-        document.getElementById('er').value = e[4];
-    }
-    if(key.startsWith("BT")) document.getElementById(key.toLowerCase()).value = val;
 }
 
 async function sendRaw(cmd){ if(!writer) return; await writer.write(cmd + "\n"); }
@@ -257,26 +232,12 @@ function setAlarm() {
 }
 
 function saveAll(){
-  setTimeout(() => send('WIFI_SSID', document.getElementById('ssid').value), 100);
-  setTimeout(() => send('WIFI_PASS', document.getElementById('pass').value), 300);
-  setTimeout(() => send('CITY', document.getElementById('city').value), 500);
-  setTimeout(() => send('APIKEY', document.getElementById('apikey').value), 700);
-  setTimeout(() => setZone(1), 900); setTimeout(() => setZone(2), 1100);
-  setTimeout(() => setAlarm(), 1300);
-  setTimeout(() => send('TIMER_SET', document.getElementById('tmr').value), 1500);
-  
-  setTimeout(() => send('BOOT1', document.getElementById('bt1').value), 1700);
-  setTimeout(() => send('BOOT2', document.getElementById('bt2').value), 1800);
-  setTimeout(() => send('BOOT3', document.getElementById('bt3').value), 1900);
-  setTimeout(() => send('BOOT4', document.getElementById('bt4').value), 2000);
-  
-  setTimeout(() => sendRaw('SAVE'), 2200);
-  const btn = event.target; btn.innerText = "Saved!"; setTimeout(() => btn.innerText = "💾 Save ALL Settings", 2500);
+  send('WIFI_SSID', document.getElementById('ssid').value);
+  setTimeout(()=>sendRaw('SAVE'), 1000);
 }
 
-function saveEyes(){ sendCmd('EYE_SAVE'); const btn = event.target; const originalText = btn.innerText; btn.innerText = "Saved!"; setTimeout(() => btn.innerText = originalText, 2000); }
+function saveEyes(){ sendCmd('EYE_SAVE'); }
 
-// Throttled Sliders
 let timeout;
 function debounce(func, delay) { return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
 const updateEye = debounce(() => { send('EYE', document.getElementById('px').value + ',' + document.getElementById('py').value); }, 50);
@@ -284,7 +245,6 @@ const updateEyePos = debounce(() => { send('EYE_POS', document.getElementById('e
 const updateEyeSize = debounce(() => { send('EYE_SIZE', document.getElementById('ew').value + ',' + document.getElementById('eh').value); }, 100);
 const updateEyeRadius = debounce(() => { send('EYE_RADIUS', document.getElementById('er').value); }, 100);
 
-initTimezones();
 </script>
 </body>
 </html>
