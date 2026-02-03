@@ -135,87 +135,64 @@ void playAnim(Adafruit_SSD1306 *display, const byte frames[][288], int frameCoun
   }
 }
 
-// NEW: Simulates eyes slowly opening from a dark screen
 void animateEyesOpening(Adafruit_SSD1306 *display) {
-  // 1. Fade to dark (Clear screen)
   display->clearDisplay();
   display->display();
-  delay(600); // Hold darkness for a dramatic pause
+  delay(600); 
 
-  // 2. Define standard eye positions (matches main code defaults)
-  int leftX = 18;
-  int rightX = 74;
-  int y = 14;
-  int w = 36;
-  int maxH = 36; 
-  int r = 8;
+  int leftX = 18; int rightX = 74; int y = 14;
+  int w = 36; int maxH = 36; int r = 8;
 
-  // 3. Animate height opening from 0 to 36
   for (int h = 0; h <= maxH; h += 2) {
     display->clearDisplay();
-    
-    // Draw expanding round rects, keeping them vertically centered
     int currentY = y + (maxH - h) / 2;
-    
     display->fillRoundRect(leftX, currentY, w, h, r, SSD1306_WHITE);
     display->fillRoundRect(rightX, currentY, w, h, r, SSD1306_WHITE);
-    
     display->display();
-    delay(30); // Speed of opening (higher = slower)
+    delay(30); 
   }
-  delay(300); // Hold fully open for a moment before handing over to loop
+  delay(300); 
 }
 
-
 // ==========================================
-// 3. MAIN BOOT SEQUENCE
+// 3. MAIN BOOT SEQUENCE (CUSTOMIZABLE)
 // ==========================================
 
-void runBootSequence(Adafruit_SSD1306 *display) {
+void runBootSequence(Adafruit_SSD1306 *display, String l1, String l2, String l3, String l4) {
   display->clearDisplay();
   display->setTextColor(SSD1306_WHITE);
 
-  // --- SCENE 1: Hey Bro... ---
+  // --- SCENE 1 ---
   display->setFont(&FreeSansBoldOblique9pt7b);
-  typeText(display, "Hey", 0, 12);
-  delay(300);
-  typeText(display, "\nBooting", 0, 18); // Newline handled by setCursor logic usually, but manual Y is safer for gfx
-  typeText(display, "\nBOBO 2.1 OS", 0, 42); 
-  delay(1500);
+  typeText(display, l1, 0, 18); 
+  typeText(display, "\n" + l2, 0, 28); 
+  delay(1000);
 
-    // --- ANIMATION: Gears ---
-  // Play gears animation for 2 loops
+  // --- ANIMATION: Gears ---
   playAnim(display, gears_frames, GEARS_COUNT, 2);
   delay(500);
 
-
-  // --- SCENE 2: Your car... ---
+  // --- SCENE 2 ---
   display->clearDisplay();
   display->setFont(&FreeSansBoldOblique9pt7b);
-  typeText(display, "Loading...", 0, 26);
+  typeText(display, l3, 0, 36); 
   delay(1000);
 
   // --- ANIMATION: Power Off ---
   playAnim(display, power_frames, POWER_COUNT, 1);
   delay(500);
 
-  // --- SCENE 3: Turn on the banger ---
+  // --- SCENE 3 ---
   display->clearDisplay();
   display->setFont(&FreeSansBoldOblique9pt7b);
-  // Center text approximation
-  typeText(display, "Here We", 0, 25);
-  typeText(display, "Go", 0, 45);
+  typeText(display, l4, 10, 40); 
   delay(1000);
-
-
-
 
   // --- ANIMATION: Rocket ---
   playAnim(display, rocket_frames, ROCKET_COUNT, 1);
   
-  // --- TRANSITION: FADE TO DARK -> EYES OPEN ---
+  // --- TRANSITION ---
   animateEyesOpening(display);
 }
-
 
 #endif
