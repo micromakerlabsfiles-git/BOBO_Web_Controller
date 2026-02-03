@@ -1,8 +1,18 @@
-# BOBO 2.1: The Complete User Guide
+# 🤖 BOBO 2.2: Advanced Personality Engine
+**Now with Daily Alarms, Smart Reminders, and Low Power Mode.**
 
-**BOBO 2.1** is an advanced personality engine for ESP32-based robots. It transforms a static display into a living, breathing character with simulated physics, distinct moods, and real-time environmental awareness.
+BOBO 2.2 is an advanced personality engine for ESP32-based robots (specifically the C3 SuperMini). It transforms a simple OLED display into a living character using a physics-driven animation system, real-time weather integration, and a full Web-based control suite.
 
 This document covers hardware assembly, software installation, API generation, and full control via the dedicated Web Interface.
+
+---
+
+## ✨ What's New in v2.2?
+- **⏰ Daily Alarm & Timer:** Set a daily alarm or a quick countdown timer directly from the Web UI or device.
+- **💤 Low Power Mode:** Double-tap to put BOBO to sleep. It dims the display and shows a "sleeping" expression to save power.
+- **💧 Wellness Reminders:** Optional hourly water alerts to keep you hydrated.
+- **💓 Enhanced Expressions:** New moods including "Love" and "Suspicious" with unique eyelid masking physics.
+- **🌐 Web Serial 2.0:** Improved synchronization between the hardware and the Web Dashboard.
 
 ---
 
@@ -38,6 +48,7 @@ To run BOBO 2.1, you will need the following components:
 | **Display** | 0.96" I2C OLED Display (SSD1306 driver) |
 | **Touch Sensor** | TTP223 Capacitive Touch Sensor |
 | **Connectivity** | Micro-USB Cable (Data + Power) |
+| **Buzzer** | A passive buzzer for sound notification |
 
 ---
 
@@ -54,6 +65,7 @@ Connect your components to the ESP32 using the following pin mapping:
 | **Touch Sensor** | I/O | `GPIO 1` |
 | **Touch Sensor** | VCC | `3.3V` or `5V` |
 | **Touch Sensor** | GND | `GND` |
+| **Buzzer** | I/O | `2` |
 
 **Circuit Diagram**
 
