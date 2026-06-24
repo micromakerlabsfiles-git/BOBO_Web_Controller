@@ -1,290 +1,1336 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>BOBO 2.2 Web Control Center</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>BOBO 2.2 Control</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <meta name="description" content="BOBO 2.2 Web Serial Control Center for ESP32-C3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono&display=swap"
+    rel="stylesheet">
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    :root {
+      --bg: #0c0c0c;
+      --card: #161616;
+      --card2: #1e1e1e;
+      --bdr2: rgba(255, 255, 255, .06);
+      --ok: #22c55e;
+      --err: #ff3b3b;
+      --pur: #a78bfa;
+      --pur2: #7c3aed;
+      --tx: #efefef;
+      --tx2: #a8a8a8;
+      --mt: #555;
+      --r: 12px;
+      --rs: 8px;
+      --fw: 760px;
 
-<style>
-:root { --bg: #0b0f14; --card: #151b23; --accent: #00ffd5; --danger: #ff4757; --text: #e8f0f2; --muted: #9aa4af; --success: #2ed573; --save-eye: #f0932b; }
-* { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; transition: all 0.2s ease; }
-body { margin: 0; background: radial-gradient(circle at top, #121a24, #06080c); color: var(--text); padding: 20px; min-height: 100vh; }
-h2 { margin: 0 0 15px; color: var(--accent); font-size: 1.1rem; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
-.container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-.card { background: var(--card); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-button { width: 100%; padding: 12px; margin-top: 5px; border: none; border-radius: 8px; background: linear-gradient(135deg, #00ffd5, #00b3ff); color: #000; font-weight: 700; cursor: pointer; position: relative; overflow: hidden; }
-button:active { transform: scale(0.98); opacity: 0.9; }
-button.secondary { background: #2a343f; color: var(--text); }
-button.danger { background: var(--danger); color: white; }
-button.save-eye { background: linear-gradient(135deg, #f0932b, #ffbe76); color: #000; }
-input, select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #333; background: #0e141b; color: var(--text); outline: none; }
-input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0, 255, 213, 0.1); }
-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: block; }
-.range-group { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-.range-group input { margin-bottom: 0; flex: 1; }
-.log { height: 100px; background: #000; color: var(--success); font-family: 'Consolas', monospace; font-size: 0.85rem; padding: 10px; border-radius: 8px; overflow-y: auto; border: 1px solid #333; white-space: pre-wrap; }
-.status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #444; margin-right: 8px; }
-.status.connected { background: var(--success); box-shadow: 0 0 10px var(--success); }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      /* Amber Glow Theme (Default) */
+      --acc: #ff6b1a;
+      --acc2: #ff8c42;
+      --acc3: #ffb380;
+      --bdr: rgba(255, 107, 26, .14);
+      --adim: rgba(255, 107, 26, .1);
+      --agl: rgba(255, 107, 26, .2);
+      --glow: rgba(255, 107, 26, .07);
+    }
 
-/* TOGGLE SWITCHES */
-.toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; }
-.toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; margin-bottom: 0; }
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 20px; }
-.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--accent); }
-input:checked + .slider:before { transform: translateX(20px); }
-</style>
+    html.theme-blue {
+      /* Deep Blue & Black Theme */
+      --bg: #000000;
+      --card: #0a0d16;
+      --card2: #111622;
+      --acc: #3b82f6;
+      --acc2: #60a5fa;
+      --acc3: #93c5fd;
+      --bdr: rgba(59, 130, 246, .18);
+      --bdr2: rgba(255, 255, 255, .05);
+      --adim: rgba(59, 130, 246, .1);
+      --agl: rgba(59, 130, 246, .25);
+      --glow: rgba(59, 130, 246, .09);
+    }
+
+    html.theme-bw {
+      /* Black & White High Contrast Theme */
+      --bg: #000000;
+      --card: #000000;
+      --card2: #090909;
+      --tx: #ffffff;
+      --tx2: #d8d8d8;
+      --mt: #8c8c8c;
+      --acc: #ffffff;
+      --acc2: #e0e0e0;
+      --acc3: #b0b0b0;
+      --bdr: #ffffff;
+      --bdr2: rgba(255, 255, 255, .2);
+      --adim: rgba(255, 255, 255, .1);
+      --agl: rgba(255, 255, 255, .2);
+      --glow: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden
+    }
+
+    body {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--tx);
+      display: flex;
+      flex-direction: column;
+      max-width: var(--fw);
+      margin: 0 auto;
+      -webkit-font-smoothing: antialiased;
+      font-size: 16px
+    }
+
+    body,
+    header,
+    .tb,
+    .c,
+    .ct,
+    .btn,
+    input,
+    select,
+    .tr,
+    .pill,
+    .sw-c,
+    .seg,
+    .step {
+      transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, color .2s ease;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--fw);
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse 80% 40% at 50% 0%, var(--glow) 0%, transparent 60%)
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--agl);
+      border-radius: 4px
+    }
+
+    /* HEADER */
+    header {
+      flex-shrink: 0;
+      z-index: 10;
+      background: rgba(12, 12, 12, .96);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--bdr);
+      padding: 0 18px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative
+    }
+
+    select.theme-sel {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: auto;
+      margin-bottom: 0;
+      padding: 5px 8px;
+      font-size: .82rem;
+      background: var(--card2);
+      border: 1px solid var(--bdr2);
+      color: var(--tx2);
+      border-radius: var(--rs);
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    select.theme-sel:hover {
+      border-color: var(--acc);
+      color: var(--tx);
+      box-shadow: 0 0 8px var(--agl);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 auto
+    }
+
+    .lm {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--acc), var(--acc2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      box-shadow: 0 0 12px var(--agl)
+    }
+
+    .ln {
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--acc2), var(--acc3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .ls {
+      font-size: 0.72rem;
+      color: var(--mt);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      display: block;
+      -webkit-text-fill-color: var(--mt)
+    }
+
+    .sp {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 99px;
+      background: var(--card2);
+      border: 1px solid var(--bdr2);
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--mt);
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%)
+    }
+
+    #hdot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--mt);
+      transition: all .3s;
+      flex-shrink: 0
+    }
+
+    #hdot.on {
+      background: var(--ok);
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
+      animation: pd 2s infinite
+    }
+
+    @keyframes pd {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, .15)
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(34, 197, 94, .05)
+      }
+    }
+
+    /* TABS */
+    .tabs {
+      flex-shrink: 0;
+      display: flex;
+      gap: 0;
+      background: rgba(12, 12, 12, .9);
+      border-bottom: 1px solid rgba(255, 107, 26, .07);
+      overflow-x: auto;
+      z-index: 5
+    }
+
+    .tabs::-webkit-scrollbar {
+      height: 0
+    }
+
+    .tb {
+      flex: 1;
+      min-width: 54px;
+      padding: 10px 0 9px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      color: var(--mt);
+      font-size: .86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap
+    }
+
+    .tb .ic {
+      font-size: 1.25rem;
+      line-height: 1
+    }
+
+    .tb:hover {
+      color: var(--tx2)
+    }
+
+    .tb.active {
+      color: var(--acc2);
+      border-bottom-color: var(--acc)
+    }
+
+    /* PANELS */
+    .panels {
+      flex: 1;
+      overflow: hidden;
+      position: relative
+    }
+
+    .pn {
+      display: none;
+      height: 100%;
+      overflow-y: auto;
+      padding: 14px 14px 20px
+    }
+
+    .pn.active {
+      display: block
+    }
+
+    /* CARD */
+    .c {
+      background: var(--card);
+      border: 1px solid var(--bdr);
+      border-radius: var(--r);
+      padding: 15px;
+      margin-bottom: 12px
+    }
+
+    .ct {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--acc);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid rgba(255, 107, 26, .06)
+    }
+
+    /* GRID */
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 7px
+    }
+
+    /* FORM */
+    label {
+      display: block;
+      font-size: .82rem;
+      color: var(--tx2);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 6px;
+      font-weight: 600
+    }
+
+    input[type=text],
+    input[type=password],
+    input[type=number],
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      margin-bottom: 12px;
+      border-radius: var(--rs);
+      border: 1px solid rgba(255, 255, 255, .06);
+      background: rgba(0, 0, 0, .4);
+      color: var(--tx);
+      font-size: .95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .18s
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--acc)
+    }
+
+    select {
+      cursor: pointer
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, .08);
+      outline: none;
+      cursor: pointer;
+      margin-bottom: 0
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--acc);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--agl)
+    }
+
+    .rr {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px
+    }
+
+    .rr input {
+      margin-bottom: 0;
+      flex: 1
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 12px;
+      border: none;
+      border-radius: var(--rs);
+      font-size: .92rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .14s;
+      margin-bottom: 8px
+    }
+
+    .btn:last-child {
+      margin-bottom: 0
+    }
+
+    .btn:active {
+      transform: scale(.97)
+    }
+
+    .bp {
+      background: linear-gradient(135deg, var(--acc), var(--acc2));
+      color: #0c0c0c;
+      box-shadow: 0 2px 10px var(--agl)
+    }
+
+    .bp:hover {
+      filter: brightness(1.06)
+    }
+
+    .bs {
+      background: linear-gradient(135deg, #16a34a, var(--ok));
+      color: #0c0c0c
+    }
+
+    .bd {
+      background: rgba(255, 59, 59, .1);
+      border: 1px solid rgba(255, 59, 59, .18);
+      color: #ff8080
+    }
+
+    .bg {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .06);
+      color: var(--tx2)
+    }
+
+    .bg:hover {
+      border-color: var(--acc);
+      color: var(--acc3)
+    }
+
+    .bpu {
+      background: linear-gradient(135deg, var(--pur), var(--pur2));
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(124, 58, 237, .28)
+    }
+
+    /* TOGGLE ROW */
+    .tr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 12px;
+      border-radius: var(--rs);
+      background: rgba(0, 0, 0, .22);
+      border: 1px solid rgba(255, 255, 255, .04);
+      margin-bottom: 9px;
+      font-size: .95rem;
+      color: var(--tx2)
+    }
+
+    .sw {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px
+    }
+
+    .sw input {
+      opacity: 0;
+      width: 0;
+      height: 0
+    }
+
+    .pill {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: rgba(255, 255, 255, .1);
+      border-radius: 24px;
+      transition: .25s
+    }
+
+    .pill:before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: .25s
+    }
+
+    input:checked+.pill {
+      background: var(--acc)
+    }
+
+    input:checked+.pill:before {
+      transform: translateX(20px)
+    }
+
+    /* LOG */
+    .log {
+      height: 110px;
+      background: rgba(0, 0, 0, .65);
+      color: #4ade80;
+      font-family: 'Space Mono', monospace;
+      font-size: .8rem;
+      padding: 9px 12px;
+      border-radius: var(--rs);
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, .04);
+      white-space: pre-wrap;
+      line-height: 1.5
+    }
+
+    /* MISC */
+    hr {
+      border: none;
+      border-top: 1px solid var(--bdr);
+      margin: 12px 0
+    }
+
+    .info {
+      padding: 10px 12px;
+      border-radius: var(--rs);
+      font-size: .88rem;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start
+    }
+
+    .info.w {
+      background: rgba(245, 158, 11, .06);
+      border: 1px solid rgba(245, 158, 11, .18);
+      color: #fbbf24
+    }
+
+    .code {
+      background: rgba(0, 0, 0, .5);
+      border: 1px solid rgba(255, 255, 255, .05);
+      border-radius: var(--rs);
+      padding: 12px 15px;
+      font-family: 'Space Mono', monospace;
+      font-size: .82rem;
+      color: var(--acc3);
+      line-height: 1.7
+    }
+
+    /* LED color swatches */
+    .swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 12px
+    }
+
+    .sw-c {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all .15s;
+      flex-shrink: 0
+    }
+
+    .sw-c:hover,
+    .sw-c.sel {
+      border-color: #fff;
+      transform: scale(1.12)
+    }
+
+    /* Brightness segments */
+    .segs {
+      display: flex;
+      gap: 4px;
+      margin: 6px 0 12px
+    }
+
+    .seg {
+      flex: 1;
+      height: 9px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, .1);
+      cursor: pointer;
+      transition: background .14s
+    }
+
+    .seg.on {
+      background: var(--acc)
+    }
+
+    /* Steps */
+    .steps {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 12px 0
+    }
+
+    .step {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      padding: 10px;
+      border-radius: var(--rs);
+      background: rgba(0, 0, 0, .25);
+      border: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .step .n {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--pur), var(--pur2));
+      color: #fff;
+      font-size: .8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .step p {
+      font-size: .82rem;
+      color: var(--tx2);
+      line-height: 1.4;
+      margin: 0
+    }
+
+    .step strong {
+      color: var(--tx)
+    }
+
+    esp-web-install-button::part(button) {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: .98rem;
+      padding: 12px 28px;
+      border-radius: var(--rs);
+      border: none;
+      background: linear-gradient(135deg, var(--pur), var(--pur2));
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 3px 14px rgba(124, 58, 237, .36);
+      transition: all .2s;
+      width: 100%
+    }
+
+    esp-web-install-button::part(button):hover {
+      filter: brightness(1.08)
+    }
+
+    @media (min-width: 500px) {
+      .pn.active {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .pn.active>.c {
+        margin-bottom: 0;
+      }
+
+      .span-2 {
+        grid-column: span 2;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <script>
+    (function () {
+      const t = localStorage.getItem('bobo-theme') || 'amber';
+      if (t === 'blue') document.documentElement.classList.add('theme-blue');
+      else if (t === 'bw') document.documentElement.classList.add('theme-bw');
+    })();
+  </script>
+  <header>
+    <select class="theme-sel" id="theme-select" onchange="changeTheme(this.value)">
+      <option value="amber">&#x1F525; Amber</option>
+      <option value="blue">&#x1F499; Blue</option>
+      <option value="bw">&#x26AA; Contrast</option>
+    </select>
+    <div class="logo">
+      <div class="lm">&#x1F916;</div>
+      <div><span class="ln">BOBO 2.2</span><span class="ls">ESP32-C3 SuperMini</span></div>
+    </div>
+    <div class="sp" id="sp">
+      <div id="hdot"></div>
+      <span id="hlbl">Disconnected</span>
+    </div>
+  </header>
 
-<div class="container">
-
-<div class="card">
-  <h2><span id="status-dot" class="status"></span>Connection</h2>
-  <div class="grid-2">
-    <button onclick="connect()">🔌 Connect</button>
-    <button class="secondary" onclick="disconnect()">❌ Close</button>
+  <div class="tabs">
+    <button class="tb active" onclick="sw('st',this)"><span class="ic">&#x1F50C;</span>Status</button>
+    <button class="tb" onclick="sw('ey',this)"><span class="ic">&#x1F441;</span>Eyes</button>
+    <button class="tb" onclick="sw('dp',this)"><span class="ic">&#x1F4FA;</span>Display</button>
+    <button class="tb" onclick="sw('al',this)"><span class="ic">&#x23F0;</span>Alarms</button>
+    <button class="tb" onclick="sw('sn',this)"><span class="ic">&#x1F50A;</span>Sound</button>
+    <button class="tb" onclick="sw('se',this)"><span class="ic">&#x2699;</span>Settings</button>
+    <button class="tb" onclick="sw('fl',this)"><span class="ic">&#x26A1;</span>Flash</button>
   </div>
-  <button class="danger" onclick="sendCmd('REBOOT')">🔄 Reboot Device</button>
-  <button onclick="saveAll()" style="margin-top:15px; background: linear-gradient(135deg, #2ed573, #26c281);">💾 Save ALL Settings</button>
-  <button onclick="sendCmd('GET_SETTINGS')" style="background:#444; margin-top:5px;">📥 Sync from BOBO</button>
-</div>
 
-<div class="card">
-  <h2>👁️ Eye Physics & Shape</h2>
-  <label>Pupil Look (X / Y)</label>
-  <div class="range-group">
-    <input type="range" min="-10" max="10" value="0" id="px" oninput="updateEye()">
-    <input type="range" min="-10" max="10" value="0" id="py" oninput="updateEye()">
-  </div>
-  <label>Eye Position (X / Y)</label>
-  <div class="range-group">
-    <input type="range" min="-10" max="10" value="0" id="ex" oninput="updateEyePos()">
-    <input type="range" min="-10" max="10" value="0" id="ey" oninput="updateEyePos()">
-  </div>
-  <label>Size (W / H)</label>
-  <div class="range-group">
-    <input type="range" min="10" max="60" value="36" id="ew" oninput="updateEyeSize()">
-    <input type="range" min="10" max="60" value="36" id="eh" oninput="updateEyeSize()">
-  </div>
-  <label>Radius</label>
-  <input type="range" min="0" max="20" value="8" id="er" oninput="updateEyeRadius()">
-  <div class="grid-2">
-    <button onclick="sendCmd('BLINK:1')">😉 Blink</button>
-    <button class="save-eye" onclick="saveEyes()">💾 Save Shape</button>
-  </div>
-</div>
+  <div class="panels">
 
-<div class="card">
-  <h2>🎮 Live Control</h2>
-  <label>Expression</label>
-  <select id="mood" onchange="send('MOOD', this.value)">
-    <option value="0">Normal</option> <option value="1">Happy</option> <option value="2">Surprised</option>
-    <option value="3">Sleepy</option> <option value="4">Angry</option> <option value="5">Sad</option>
-    <option value="6">Excited</option> <option value="7">Love</option> <option value="8">Suspicious</option>
-  </select>
-  <label>Force Page</label>
-  <select id="page" onchange="send('PAGE', this.value)">
-    <option value="0">Eyes</option> <option value="1">Clock</option>
-    <option value="2">Weather</option> <option value="3">World Clock</option>
-    <option value="4">Forecast</option> <option value="5">Alarm View</option>
-    <option value="6">Alarm Set</option>
-  </select>
-  <label style="margin-top:10px">Brightness</label>
-  <input type="range" min="1" max="255" value="255" id="br" onchange="send('BRIGHT', this.value)">
-</div>
+    <!-- STATUS -->
+    <div id="p-st" class="pn active">
+      <div class="c span-2">
+        <div class="ct">&#x1F50C; Connection</div>
+        <div class="g2"><button class="btn bp" id="bc" onclick="doConnect()">Connect</button>
+          <button class="btn bg" id="bd2" onclick="doDisc()">Disconnect</button>
+        </div>
+        <button class="btn bg" onclick="sendCmd('GET_SETTINGS')">&#x2B07; Sync from BOBO</button>
+        <button class="btn bd" onclick="sendCmd('REBOOT')">&#x21BA; Reboot</button>
+      </div>
+      <div class="c span-2">
+        <div class="ct">&#x1F4BB; Serial Log</div>
+        <div class="log" id="log">Waiting for connection</div>
+      </div>
+    </div>
 
-<div class="card">
-  <h2>⏰ Alarm & Timers</h2>
-  
-  <div class="toggle-row">
-    <span>Daily Alarm</span>
-    <label class="toggle-switch"><input type="checkbox" id="aOn"><span class="slider"></span></label>
-  </div>
-  
-  <div class="grid-2">
-    <input type="number" id="aH" placeholder="Hour (0-23)">
-    <input type="number" id="aM" placeholder="Min (0-59)">
-  </div>
-  <button onclick="setAlarm()">Set Alarm Time</button>
+    <!-- EYES -->
+    <div id="p-ey" class="pn">
+      <div class="c span-2">
+        <div class="ct">&#x1F441; Pupil Look X / Y</div>
+        <div class="rr">
+          <input type="range" min="-10" max="10" value="0" id="px" oninput="updEye()">
+          <input type="range" min="-10" max="10" value="0" id="py" oninput="updEye()">
+        </div>
+        <div class="ct">Position Offset X / Y</div>
+        <div class="rr">
+          <input type="range" min="-10" max="10" value="0" id="ex" oninput="updPos()">
+          <input type="range" min="-10" max="10" value="0" id="ey" oninput="updPos()">
+        </div>
+        <div class="ct">Size W / H</div>
+        <div class="rr">
+          <input type="range" min="10" max="60" value="36" id="ew" oninput="updSz()">
+          <input type="range" min="10" max="60" value="36" id="eh" oninput="updSz()">
+        </div>
+        <div class="ct">Corner Radius</div>
+        <input type="range" min="0" max="20" value="8" id="er" oninput="updR()" style="margin-bottom:9px">
+        <div class="g2" style="margin-bottom:8px">
+          <button class="btn bg" onclick="sendCmd('BLINK:1')">&#x1F609; Blink</button>
+        </div>
+        <button class="btn bp" id="bsvEyes" onclick="saveEyes()">&#x1F4BE; Save Eye Settings</button>
+      </div>
+    </div>
 
-  <label style="margin-top:15px;">Countdown Timer (Triple Tap)</label>
-  <div class="grid-2">
-    <input type="number" id="tmr" value="10" placeholder="Minutes">
-    <button onclick="send('TIMER_SET', document.getElementById('tmr').value)">Set Timer</button>
-  </div>
-</div>
+    <!-- DISPLAY -->
+    <div id="p-dp" class="pn">
+      <div class="c">
+        <div class="ct">&#x1F4FA; Display</div>
+        <div class="tr"><span>Invert Display</span>
+          <label class="sw"><input type="checkbox" id="inv" onchange="send('INVERT',this.checked?1:0)"><span
+              class="pill"></span></label>
+        </div>
+        <label style="margin-top:4px">Brightness</label>
+        <input type="range" min="1" max="255" value="255" id="br" onchange="send('BRIGHT',this.value)"
+          style="margin-bottom:9px">
+        <label>Mood</label>
+        <select id="mood" onchange="send('MOOD',this.value)">
+          <option value="0">&#x1F610; Normal</option>
+          <option value="1">&#x1F60A; Happy</option>
+          <option value="2">&#x1F632; Surprised</option>
+          <option value="3">&#x1F634; Sleepy</option>
+          <option value="4">&#x1F620; Angry</option>
+          <option value="5">&#x1F622; Sad</option>
+          <option value="6">&#x1F929; Excited</option>
+          <option value="7">&#x1F60D; Love</option>
+        </select>
+        <label>Force Page</label>
+        <select id="page" onchange="send('PAGE',this.value)">
+          <option value="0">&#x1F441; Eyes</option>
+          <option value="1">&#x1F550; Digital Clock</option>
+          <option value="9">&#x1F570; Analog Clock</option>
+          <option value="2">&#x1F4C5; Date</option>
+          <option value="3">&#x1F30D; World Clock</option>
+          <option value="4">&#x1F4AC; Quotes</option>
+          <option value="5">&#x23F0; Alarm View</option>
+          <option value="6">&#x2699; Alarm Set</option>
+          <option value="7">&#x1F9EE; Settings Menu</option>
+          <option value="8">&#x1F3B5; Music Menu</option>
+        </select>
+      </div>
+      <div class="c">
+        <div class="ct">&#x1F30D; World Clock</div>
+        <label>Zone 1 (Left)</label>
+        <div class="g2"><select id="tz1"></select><button class="btn bp" onclick="setZ(1)">Set</button></div>
+        <label style="margin-top:6px">Zone 2 (Right)</label>
+        <div class="g2"><select id="tz2"></select><button class="btn bp" onclick="setZ(2)">Set</button></div>
+      </div>
+      <div class="c">
+        <div class="ct">&#x1F550; Home Timezone</div>
+        <label>Select Home Timezone</label>
+        <div class="g2"><select id="tz-home"></select><button class="btn bp" onclick="setHomeTZ()">Set Home TZ</button>
+        </div>
+      </div>
+      <div class="span-2" style="margin-top:4px">
+        <button class="btn bs" id="bsvDisplay" onclick="saveDisplay()">&#x1F4BE; Save Display & Timezone
+          Settings</button>
+      </div>
+    </div>
 
-<div class="card">
-  <h2>🔊 Sound & Alerts</h2>
-  <div class="toggle-row">
-    <span>Touch Sound</span>
-    <label class="toggle-switch"><input type="checkbox" id="snd" onchange="send('SOUND', this.checked?1:0)" checked><span class="slider"></span></label>
-  </div>
-  <div class="toggle-row">
-    <span>Hourly Chime</span>
-    <label class="toggle-switch"><input type="checkbox" id="chm" onchange="send('CHIME', this.checked?1:0)" checked><span class="slider"></span></label>
-  </div>
-  <div class="toggle-row">
-    <span>Water Reminder</span>
-    <label class="toggle-switch"><input type="checkbox" id="wtr" onchange="send('WATER', this.checked?1:0)"><span class="slider"></span></label>
-  </div>
-</div>
+    <!-- ALARMS -->
+    <div id="p-al" class="pn">
+      <div class="c">
+        <div class="ct">&#x23F0; Daily Alarm</div>
+        <div class="tr"><span>Alarm On</span>
+          <label class="sw"><input type="checkbox" id="aOn"><span class="pill"></span></label>
+        </div>
+        <div class="g2">
+          <div><label>Hour (0-23)</label><input type="number" id="aH" min="0" max="23" placeholder="7"></div>
+          <div><label>Min (0-59)</label><input type="number" id="aM" min="0" max="59" placeholder="0"></div>
+        </div>
+        <button class="btn bp" onclick="setAlarm()" style="margin-top:4px">Set Alarm</button>
+      </div>
+      <div class="c">
+        <div class="ct">&#x23F2; Countdown Timer</div>
+        <label>Minutes (Double-tap on Clock screen to start)</label>
+        <div class="g2">
+          <input type="number" id="tmr" value="10" placeholder="Min">
+          <button class="btn bg" onclick="send('TIMER_SET',g('tmr').value)">Set</button>
+        </div>
+      </div>
+      <div class="span-2" style="margin-top:4px">
+        <button class="btn bs" id="bsvAlarm" onclick="saveAlarms()">&#x1F4BE; Save Alarm & Timer Settings</button>
+      </div>
+    </div>
 
-<div class="card">
-  <h2>🚀 Boot Text</h2>
-  <input id="bt1" value="Booting" onchange="send('BOOT1', this.value)">
-  <input id="bt2" value="BOBO 2.2" onchange="send('BOOT2', this.value)">
-  <input id="bt3" value="Loading..." onchange="send('BOOT3', this.value)">
-  <input id="bt4" value="Here We Go" onchange="send('BOOT4', this.value)">
-</div>
+    <!-- SOUND -->
+    <div id="p-sn" class="pn">
+      <div class="c">
+        <div class="ct">&#x1F50A; Sound</div>
+        <div class="tr"><span>Touch Sound</span>
+          <label class="sw"><input type="checkbox" id="snd" checked onchange="send('SOUND',this.checked?1:0)"><span
+              class="pill"></span></label>
+        </div>
+        <div class="tr"><span>Hourly Chime</span>
+          <label class="sw"><input type="checkbox" id="chm" checked onchange="send('CHIME',this.checked?1:0)"><span
+              class="pill"></span></label>
+        </div>
+        <div class="tr"><span>Water Reminder (1hr)</span>
+          <label class="sw"><input type="checkbox" id="wtr" onchange="send('WATER',this.checked?1:0)"><span
+              class="pill"></span></label>
+        </div>
+      </div>
+      <div class="c">
+        <div class="ct">&#x1F3B5; Music Player</div>
+        <label>Tune</label>
+        <select id="tune">
+          <option value="0">&#x1F382; Happy Birthday</option>
+          <option value="1">&#x1F514; Jingle Bells</option>
+          <option value="2">&#x2B50; Twinkle Twinkle</option>
+          <option value="3">&#x1F4F1; Nokia Tune</option>
+          <option value="4">&#x1F342; Super Mario</option>
+          <option value="5">&#x1F680; Star Wars Theme</option>
+          <option value="6">&#x1F396;&#xFE0F; Imperial March</option>
+          <option value="7">&#x1F3BC; Ode to Joy</option>
+          <option value="8">&#x1F3B9; Fur Elise</option>
+          <option value="9">&#x1F384; We Wish You a Merry Xmas</option>
+          <option value="10">&#x1F9DF; Zelda Lullaby</option>
+          <option value="11">&#x1F579;&#xFE0F; Tetris Theme</option>
+          <option value="12">&#x1F3AE; Pac-Man Theme</option>
+          <option value="13">&#x1F9D4; Harry Potter Theme</option>
+          <option value="14">&#x1F694; Axel F</option>
+          <option value="15">&#x1F935; Rick Roll</option>
+          <option value="16">&#x1F3C6; FF Victory</option>
+          <option value="17">&#x1F90F; Pink Panther Theme</option>
+          <option value="18">&#x1F918; We Will Rock You</option>
+          <option value="19">&#x1F30E; Joy to the World</option>
+        </select>
+        <button class="btn bp" onclick="send('PLAY_TUNE',g('tune').value)">&#x25B6; Play on BOBO</button>
+      </div>
+      <div class="span-2" style="margin-top:4px">
+        <button class="btn bs" id="bsvSound" onclick="saveSound()">&#x1F4BE; Save Sound Settings</button>
+      </div>
+    </div>
 
-<div class="card">
-  <h2>World Clock</h2>
-  <label>Zone 1 (Left)</label>
-  <div class="grid-2"><select id="tz1"></select><button onclick="setZone(1)">Set</button></div>
-  <label style="margin-top:10px">Zone 2 (Right)</label>
-  <div class="grid-2"><select id="tz2"></select><button onclick="setZone(2)">Set</button></div>
-</div>
+    <!-- SETTINGS -->
+    <div id="p-se" class="pn">
+      <div class="c">
+        <div class="ct">&#x1F4A1; WS2812B LED (GPIO 6)</div>
+        <div class="g2" style="align-items: end;">
+          <div>
+            <label>LED Status</label>
+            <div class="tr" style="margin-bottom:12px; height: 41px; padding: 6px 12px;"><span>Active</span>
+              <label class="sw"><input type="checkbox" id="lOn" onchange="send('LED_ON',this.checked?1:0)"><span class="pill"></span></label>
+            </div>
+          </div>
+          <div>
+            <label>Effect</label>
+            <select id="lFx" onchange="send('LED_FX',this.value)" style="margin-bottom:12px">
+              <option value="0">&#x2B1B; Solid</option>
+              <option value="1">&#x1F4A1; Blink</option>
+              <option value="2">&#x1F31F; Pulse</option>
+            </select>
+          </div>
+        </div>
+        <div class="g2" style="align-items: center;">
+          <div>
+            <label>Brightness</label>
+            <div class="segs" id="segs" style="margin: 0 0 12px;">
+              <div class="seg" onclick="setLB(1)" id="s1"></div>
+              <div class="seg" onclick="setLB(2)" id="s2"></div>
+              <div class="seg" onclick="setLB(3)" id="s3"></div>
+              <div class="seg" onclick="setLB(4)" id="s4"></div>
+              <div class="seg" onclick="setLB(5)" id="s5"></div>
+            </div>
+          </div>
+          <div>
+            <label>Color Presets</label>
+            <div class="swatches" id="swatches" style="margin-bottom:12px; gap: 4px;">
+              <div class="sw-c sel" style="background:#ff6b1a; width:22px; height:22px;" onclick="setC(255,107,26,this)" title="Orange"></div>
+              <div class="sw-c" style="background:#fff; width:22px; height:22px;" onclick="setC(255,255,255,this)" title="White"></div>
+              <div class="sw-c" style="background:#ff2020; width:22px; height:22px;" onclick="setC(255,32,32,this)" title="Red"></div>
+              <div class="sw-c" style="background:#22c55e; width:22px; height:22px;" onclick="setC(34,197,94,this)" title="Green"></div>
+              <div class="sw-c" style="background:#3b82f6; width:22px; height:22px;" onclick="setC(59,130,246,this)" title="Blue"></div>
+              <div class="sw-c" style="background:#a855f7; width:22px; height:22px;" onclick="setC(168,85,247,this)" title="Purple"></div>
+              <div class="sw-c" style="background:#06b6d4; width:22px; height:22px;" onclick="setC(6,182,212,this)" title="Cyan"></div>
+              <div class="sw-c" style="background:#facc15; width:22px; height:22px;" onclick="setC(250,204,21,this)" title="Yellow"></div>
+              <div class="sw-c" style="background:#ff69b4; width:22px; height:22px;" onclick="setC(255,105,180,this)" title="Pink"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="c">
+        <div class="ct">&#x1F680; Boot Text</div>
+        <div class="g2">
+          <div><label>Line 1</label><input type="text" id="bt1" value="Booting"></div>
+          <div><label>Line 2</label><input type="text" id="bt2" value="BOBO 2.2"></div>
+        </div>
+        <div class="g2">
+          <div><label>Line 3</label><input type="text" id="bt3" value="Loading"></div>
+          <div><label>Line 4</label><input type="text" id="bt4" value="Here We Go"></div>
+        </div>
+      </div>
+      <div class="c">
+        <div class="ct">&#x1F680; Boot Customization</div>
+        <div class="g2" style="gap: 6px;">
+          <div class="tr" style="margin-bottom:0; padding: 6px 10px; font-size: 0.85rem;"><span>Line 1 Text</span>
+            <label class="sw"><input type="checkbox" id="bt-l1" checked><span class="pill"></span></label>
+          </div>
+          <div class="tr" style="margin-bottom:0; padding: 6px 10px; font-size: 0.85rem;"><span>Line 2 Text</span>
+            <label class="sw"><input type="checkbox" id="bt-l2" checked><span class="pill"></span></label>
+          </div>
+          <div class="tr" style="margin-bottom:0; padding: 6px 10px; font-size: 0.85rem;"><span>Line 3 Text</span>
+            <label class="sw"><input type="checkbox" id="bt-l3" checked><span class="pill"></span></label>
+          </div>
+          <div class="tr" style="margin-bottom:0; padding: 6px 10px; font-size: 0.85rem;"><span>Line 4 Text</span>
+            <label class="sw"><input type="checkbox" id="bt-l4" checked><span class="pill"></span></label>
+          </div>
+          <div class="tr" style="margin-bottom:0; padding: 6px 10px; font-size: 0.85rem;"><span>Gears Anim</span>
+            <label class="sw"><input type="checkbox" id="bt-gears" checked><span class="pill"></span></label>
+          </div>
+          <div class="tr" style="margin-bottom:0; padding: 6px 10px; font-size: 0.85rem;"><span>Power Anim</span>
+            <label class="sw"><input type="checkbox" id="bt-power" checked><span class="pill"></span></label>
+          </div>
+          <div class="tr" style="margin-bottom:0; padding: 6px 10px; font-size: 0.85rem; grid-column: span 2;"><span>Rocket Anim</span>
+            <label class="sw" style="float: right; margin-top: -2px;"><input type="checkbox" id="bt-rocket" checked><span class="pill"></span></label>
+          </div>
+        </div>
+      </div>
 
-<div class="card">
-  <h2>Network & API</h2>
-  <input id="ssid" placeholder="WiFi Name"><input id="pass" type="password" placeholder="WiFi Password">
-  <div class="grid-2"><button onclick="send('WIFI_SSID', ssid.value)">Set SSID</button><button onclick="send('WIFI_PASS', pass.value)">Set Pass</button></div>
-  <input id="city" placeholder="City"><button onclick="send('CITY', city.value)">Set City</button>
-  <input id="apikey" type="password" placeholder="API Key"><button onclick="send('APIKEY', apikey.value)">Set Key</button>
-</div>
+      <div class="span-2" style="margin-top:4px">
+        <button class="btn bs" id="bsvSettings" onclick="saveSettingsTab()">&#x1F4BE; Save Settings</button>
+      </div>
+    </div>
 
-<div class="card" style="grid-column: 1 / -1;">
-  <h2>Monitor</h2>
-  <div class="log" id="log">Waiting...</div>
-</div>
+    <!-- FLASH -->
+    <div id="p-fl" class="pn">
+      <div class="c" style="text-align:center;padding:14px 11px">
+        <div style="font-size:2rem;margin-bottom:7px;filter:drop-shadow(0 0 12px rgba(124,58,237,.5))">&#x26A1;</div>
+        <div
+          style="font-size:1.05rem;font-weight:700;margin-bottom:6px;background:linear-gradient(135deg,var(--pur),#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+          Flash BOBO Firmware</div>
+        <p style="color:var(--tx2);font-size:.78rem;line-height:1.6;margin-bottom:12px">Install or update via browser.
+          No Arduino IDE needed.</p>
+        <div class="info w"><span>&#x26A0;</span><span style="text-align:left"><strong>First-time flash erases
+              settings.</strong> Re-configure after.</span></div>
+        <label>Display Variant</label>
+        <select id="flash-manifest" onchange="g('binst-el').setAttribute('manifest', this.value)"
+          style="margin-bottom:12px">
+          <option value="manifest_ssd1306.json">SSD1306 OLED (Standard 0.96")</option>
+          <option value="manifest_sh110x.json">SH110X OLED (Alternative 1.3")</option>
+        </select>
+        <esp-web-install-button id="binst-el" manifest="manifest_ssd1306.json">
+          <button slot="activate" class="btn bpu" id="binst" style="margin-bottom:5px;margin-top:4px">&#x26A1; Install /
+            Update</button>
+          <span slot="unsupported">
+            <p style="font-size:.73rem;color:#ff8080;margin-top:6px">&#x274C; Use Chrome, Edge or Opera</p>
+          </span>
+        </esp-web-install-button>
+        <p style="font-size:.65rem;color:var(--mt);margin-top:4px">Powered by <a
+            href="https://esphome.github.io/esp-web-tools/" target="_blank"
+            style="color:var(--pur);text-decoration:none">ESP Web Tools</a></p>
+      </div>
+      <div class="c">
+        <div class="ct">&#x1F4CB; Steps</div>
+        <div class="steps">
+          <div class="step">
+            <div class="n">1</div>
+            <p><strong>Connect USB</strong> to PC</p>
+          </div>
+          <div class="step">
+            <div class="n">2</div>
+            <p><strong>Click Install</strong>, pick port</p>
+          </div>
+          <div class="step">
+            <div class="n">3</div>
+            <p><strong>Wait ~30s</strong> to reboot</p>
+          </div>
+          <div class="step">
+            <div class="n">4</div>
+            <p><strong>Configure</strong> in Settings</p>
+          </div>
+        </div>
+        <hr>
+        <div class="ct" style="margin-top:8px">&#x1F50C; Pin Configuration</div>
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem; color:var(--tx2); margin-top:8px;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--bdr); text-align:left;">
+              <th style="padding:6px 0; color:var(--acc);">Component</th>
+              <th style="padding:6px 0; color:var(--acc); text-align:right;">ESP32-C3 Pin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+              <td style="padding:6px 0;">OLED SDA</td>
+              <td style="padding:6px 0; text-align:right; font-family:'Space Mono',monospace; color:var(--tx);">GPIO 20</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+              <td style="padding:6px 0;">OLED SCL</td>
+              <td style="padding:6px 0; text-align:right; font-family:'Space Mono',monospace; color:var(--tx);">GPIO 21</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+              <td style="padding:6px 0;">WS2812 LED</td>
+              <td style="padding:6px 0; text-align:right; font-family:'Space Mono',monospace; color:var(--tx);">GPIO 6</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+              <td style="padding:6px 0;">Buzzer</td>
+              <td style="padding:6px 0; text-align:right; font-family:'Space Mono',monospace; color:var(--tx);">GPIO 2</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">Touch Sensor</td>
+              <td style="padding:6px 0; text-align:right; font-family:'Space Mono',monospace; color:var(--tx);">GPIO 1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-</div>
-
-<script>
-const timezones = [
-  { name: "Los Angeles", off: -28800 }, { name: "Denver", off: -25200 }, { name: "Chicago", off: -21600 },
-  { name: "New York", off: -18000 }, { name: "Sao Paulo", off: -10800 }, { name: "London", off: 0 },
-  { name: "Paris", off: 3600 }, { name: "Cairo", off: 7200 }, { name: "Moscow", off: 10800 },
-  { name: "Dubai", off: 14400 }, { name: "Karachi", off: 18000 }, { name: "Mumbai", off: 19800 },
-  { name: "Dhaka", off: 21600 }, { name: "Bangkok", off: 25200 }, { name: "Singapore", off: 28800 },
-  { name: "Tokyo", off: 32400 }, { name: "Sydney", off: 39600 }
-];
-
-function initTimezones() {
-  const sel1 = document.getElementById('tz1');
-  const sel2 = document.getElementById('tz2');
-  timezones.forEach(tz => {
-    let opt1 = document.createElement('option'); opt1.value = tz.name + "," + tz.off; opt1.text = tz.name; sel1.appendChild(opt1);
-    let opt2 = document.createElement('option'); opt2.value = tz.name + "," + tz.off; opt2.text = tz.name; sel2.appendChild(opt2);
-  });
-}
-function setZone(num) { send('Z' + num + '_SET', document.getElementById('tz' + num).value); }
-
-let port, writer, reader;
-function log(t){ const l=document.getElementById('log'); l.textContent+=`>> ${t}\n`; l.scrollTop=l.scrollHeight; }
-
-async function connect(){
-  try {
-    port = await navigator.serial.requestPort();
-    await port.open({baudRate: 115200});
-    const te=new TextEncoderStream(); te.readable.pipeTo(port.writable); writer=te.writable.getWriter();
-    const td=new TextDecoderStream(); port.readable.pipeTo(td.writable); reader=td.readable.getReader();
-    document.getElementById('status-dot').classList.add('connected');
-    log("CONNECTED");
-    setTimeout(()=>sendCmd('GET_SETTINGS'), 1500); // Auto Sync Once
-    readLoop();
-  } catch(e) { log(e); }
-}
-
-async function disconnect(){ if(reader)await reader.cancel(); if(writer)await writer.close(); if(port)await port.close(); }
-
-async function readLoop(){
-  while(true){ 
-    const {value, done} = await reader.read(); 
-    if(done) break; 
-    if(value.trim()) {
-        log(value.trim());
-        parseSettings(value.trim());
+  </div><!-- /panels -->
+  <script>
+    // TABS
+    function sw(id, btn) {
+      document.querySelectorAll('.pn').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tb').forEach(b => b.classList.remove('active'));
+      document.getElementById('p-' + id).classList.add('active');
+      btn.classList.add('active');
     }
-  }
-}
+    // TIMEZONES
+    const TZ = [
+      { n: 'Los Angeles', o: -28800 }, { n: 'Denver', o: -25200 }, { n: 'Chicago', o: -21600 },
+      { n: 'New York', o: -18000 }, { n: 'Sao Paulo', o: -10800 }, { n: 'London', o: 0 },
+      { n: 'Paris', o: 3600 }, { n: 'Cairo', o: 7200 }, { n: 'Moscow', o: 10800 },
+      { n: 'Dubai', o: 14400 }, { n: 'Karachi', o: 18000 }, { n: 'Mumbai', o: 19800 },
+      { n: 'Dhaka', o: 21600 }, { n: 'Bangkok', o: 25200 }, { n: 'Singapore', o: 28800 },
+      { n: 'Tokyo', o: 32400 }, { n: 'Sydney', o: 39600 }
+    ];
+    ['tz1', 'tz2', 'tz-home'].forEach(id => { const s = g(id); TZ.forEach(z => { const o = document.createElement('option'); o.value = z.n + ',' + z.o; o.text = z.n; s.appendChild(o); }); });
+    function setZ(n) { send('Z' + n + '_SET', g('tz' + n).value); }
 
-function parseSettings(data) {
-    if(!data.startsWith("SET:")) return;
-    const parts = data.substring(4).split('=');
-    const key = parts[0];
-    const val = parts[1];
-    
-    if(key=="WIFI_SSID") document.getElementById('ssid').value = val;
-    if(key=="WIFI_PASS") document.getElementById('pass').value = val;
-    if(key=="APIKEY") document.getElementById('apikey').value = val;
-    if(key=="CITY") document.getElementById('city').value = val;
-    if(key=="TIMER") document.getElementById('tmr').value = val;
-    if(key=="ALARM") {
-        const a = val.split(',');
-        document.getElementById('aH').value = a[0];
-        document.getElementById('aM').value = a[1];
-        document.getElementById('aOn').checked = (a[2] == "1");
+    // SERIAL
+    let port, writer, reader;
+    function g(id) { return document.getElementById(id); }
+    function log(t) { const el = g('log'); el.textContent += '>>' + t + '\n'; el.scrollTop = el.scrollHeight; }
+    function setConn(on) {
+      g('hdot').className = on ? 'on' : ''; g('hlbl').textContent = on ? 'Connected' : 'Disconnected';
+      const p = g('sp'); on ? p.classList.add('on') : p.classList.remove('on');
     }
-    if(key=="SND") document.getElementById('snd').checked = (val == "1");
-    if(key=="CHM") document.getElementById('chm').checked = (val == "1");
-    if(key=="WTR") document.getElementById('wtr').checked = (val == "1");
-    if(key=="EYE") {
-        const e = val.split(',');
-        document.getElementById('ex').value = e[0];
-        document.getElementById('ey').value = e[1];
-        document.getElementById('ew').value = e[2];
-        document.getElementById('eh').value = e[3];
-        document.getElementById('er').value = e[4];
+    async function doConnect() {
+      try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200 });
+        const te = new TextEncoderStream(); te.readable.pipeTo(port.writable); writer = te.writable.getWriter();
+        const td = new TextDecoderStream(); port.readable.pipeTo(td.writable); reader = td.readable.getReader();
+        setConn(true); log('CONNECTED'); setTimeout(() => { sendCmd('GET_SETTINGS'); send('TIME_SET', Math.floor(Date.now() / 1000)); }, 1500); readLoop();
+      } catch (e) { log('ERROR: ' + e); }
     }
-    if(key.startsWith("BT")) document.getElementById(key.toLowerCase()).value = val;
-}
+    async function doDisc() {
+      try { if (reader) { await reader.cancel(); reader = null; } if (writer) { await writer.close(); writer = null; } if (port) { await port.close(); port = null; } } catch (e) { }
+      setConn(false); log('DISCONNECTED');
+    }
+    async function readLoop() {
+      let buf = '';
+      while (true) {
+        try {
+          const { value, done } = await reader.read(); if (done) break; buf += value;
+          const lines = buf.split('\n'); buf = lines.pop();
+          lines.forEach(l => { l = l.trim(); if (l) { log(l); parseSET(l); } });
+        } catch (e) { break; }
+      }
+    }
+    function parseSET(d) {
+      if (!d.startsWith('SET:')) return;
+      const eq = d.indexOf('='); if (eq < 0) return;
+      const key = d.substring(4, eq), val = d.substring(eq + 1);
+      const m = { TIMER: 'tmr', BT1: 'bt1', BT2: 'bt2', BT3: 'bt3', BT4: 'bt4' };
+      if (m[key]) g(m[key]).value = val;
+      if (key === 'ALARM') { const a = val.split(','); g('aH').value = a[0]; g('aM').value = a[1]; g('aOn').checked = (a[2] === '1'); }
+      if (key === 'SND') g('snd').checked = (val === '1');
+      if (key === 'CHM') g('chm').checked = (val === '1');
+      if (key === 'WTR') g('wtr').checked = (val === '1');
+      if (key === 'INV') g('inv').checked = (val === '1');
+      if (key === 'LED') {
+        const p = val.split(','); g('lOn').checked = (p[0] === '1');
+        setLBui(parseInt(p[1]) || 3); g('lFx').value = p[2] || '0';
+      }
+      if (key === 'EYE') { const e = val.split(',');['ex', 'ey', 'ew', 'eh', 'er'].forEach((id, i) => { if (g(id)) g(id).value = e[i]; }); }
+      if (key === 'Z1') { const z = val.split(','); const s = g('tz1'); for (let i = 0; i < s.options.length; i++)if (s.options[i].value.startsWith(z[0])) s.selectedIndex = i; }
+      if (key === 'Z2') { const z = val.split(','); const s = g('tz2'); for (let i = 0; i < s.options.length; i++)if (s.options[i].value.startsWith(z[0])) s.selectedIndex = i; }
+      if (key === 'HOME_TZ') { const offset = parseInt(val); const s = g('tz-home'); for (let i = 0; i < s.options.length; i++)if (parseInt(s.options[i].value.split(',')[1]) === offset) { s.selectedIndex = i; break; } }
+      if (key === 'BTFLAGS') { setBootFlags(parseInt(val)); }
+    }
+    async function sendRaw(cmd) { if (!writer) { log('Not connected'); return; } await writer.write(cmd + '\n'); }
+    function send(k, v) { sendRaw(k + ':' + v); }
+    function sendCmd(c) { sendRaw(c); }
+    function setAlarm() { send('ALARM_SET', g('aH').value + ',' + g('aM').value + ',' + (g('aOn').checked ? 1 : 0)); }
 
-async function sendRaw(cmd){ if(!writer) return; await writer.write(cmd + "\n"); }
-function send(k, v){ sendRaw(`${k}:${v}`); }
-function sendCmd(cmd){ sendRaw(cmd); }
+    // LED Brightness segments
+    let _lb = 3;
+    function setLBui(n) { _lb = n; for (let i = 1; i <= 5; i++) { const el = g('s' + i); if (el) el.className = 'seg' + (i <= n ? ' on' : ''); } }
+    function setLB(n) { setLBui(n); send('LED_BRIGHT', n); }
 
-function setAlarm() {
-    const h = document.getElementById('aH').value;
-    const m = document.getElementById('aM').value;
-    const on = document.getElementById('aOn').checked ? 1 : 0;
-    send('ALARM_SET', `${h},${m},${on}`);
-}
+    // LED Color swatches
+    function setC(r, gr, b, el) {
+      document.querySelectorAll('.sw-c').forEach(e => e.classList.remove('sel'));
+      el.classList.add('sel');
+      send('LED_COLOR', r + ',' + gr + ',' + b);
+    }
 
-function saveAll(){
-  setTimeout(() => send('WIFI_SSID', document.getElementById('ssid').value), 100);
-  setTimeout(() => send('WIFI_PASS', document.getElementById('pass').value), 300);
-  setTimeout(() => send('CITY', document.getElementById('city').value), 500);
-  setTimeout(() => send('APIKEY', document.getElementById('apikey').value), 700);
-  setTimeout(() => setZone(1), 900); setTimeout(() => setZone(2), 1100);
-  setTimeout(() => setAlarm(), 1300);
-  setTimeout(() => send('TIMER_SET', document.getElementById('tmr').value), 1500);
-  
-  setTimeout(() => send('BOOT1', document.getElementById('bt1').value), 1700);
-  setTimeout(() => send('BOOT2', document.getElementById('bt2').value), 1800);
-  setTimeout(() => send('BOOT3', document.getElementById('bt3').value), 1900);
-  setTimeout(() => send('BOOT4', document.getElementById('bt4').value), 2000);
-  
-  setTimeout(() => sendRaw('SAVE'), 2200);
-  const btn = event.target; btn.innerText = "Saved!"; setTimeout(() => btn.innerText = "💾 Save ALL Settings", 2500);
-}
+    // SAVE FEEDBACK HELPER
+    function showSavedBtn(id, customMsg) {
+      const btn = g(id); if (!btn) return;
+      const orig = btn.innerHTML;
+      btn.innerHTML = customMsg || '&#x1F4BE; Saved!';
+      setTimeout(() => btn.innerHTML = orig, 2200);
+    }
 
-function saveEyes(){ sendCmd('EYE_SAVE'); const btn = event.target; const originalText = btn.innerText; btn.innerText = "Saved!"; setTimeout(() => btn.innerText = originalText, 2000); }
+    // SAVE ALL (staggered sends)
+    function saveAll() {
+      const t = (ms, fn) => setTimeout(fn, ms);
+      t(0, () => setZ(1)); t(150, () => setZ(2));
+      t(300, () => setAlarm());
+      t(450, () => send('TIMER_SET', g('tmr').value));
+      t(550, () => send('BOOT1', g('bt1').value));
+      t(650, () => send('BOOT2', g('bt2').value));
+      t(750, () => send('BOOT3', g('bt3').value));
+      t(850, () => send('BOOT4', g('bt4').value));
+      t(950, () => send('SOUND', g('snd').checked ? 1 : 0));
+      t(1050, () => send('CHIME', g('chm').checked ? 1 : 0));
+      t(1150, () => send('WATER', g('wtr').checked ? 1 : 0));
+      t(1250, () => send('INVERT', g('inv').checked ? 1 : 0));
+      t(1350, () => send('LED_ON', g('lOn').checked ? 1 : 0));
+      t(1450, () => send('LED_BRIGHT', _lb));
+      t(1550, () => send('LED_FX', g('lFx').value));
+      t(1700, () => sendRaw('SAVE'));
+      showSavedBtn('bsv', '&#x2705; All Saved!');
+    }
 
-// Throttled Sliders
-let timeout;
-function debounce(func, delay) { return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
-const updateEye = debounce(() => { send('EYE', document.getElementById('px').value + ',' + document.getElementById('py').value); }, 50);
-const updateEyePos = debounce(() => { send('EYE_POS', document.getElementById('ex').value + ',' + document.getElementById('ey').value); }, 100);
-const updateEyeSize = debounce(() => { send('EYE_SIZE', document.getElementById('ew').value + ',' + document.getElementById('eh').value); }, 100);
-const updateEyeRadius = debounce(() => { send('EYE_RADIUS', document.getElementById('er').value); }, 100);
+    function saveEyes() {
+      sendCmd('EYE_SAVE');
+      showSavedBtn('bsvEyes');
+    }
 
-initTimezones();
-</script>
+    function saveDisplay() {
+      const t = (ms, fn) => setTimeout(fn, ms);
+      t(0, () => send('INVERT', g('inv').checked ? 1 : 0));
+      t(150, () => send('BRIGHT', g('br').value));
+      t(300, () => send('MOOD', g('mood').value));
+      t(450, () => send('PAGE', g('page').value));
+      t(600, () => setZ(1));
+      t(750, () => setZ(2));
+      t(850, () => setHomeTZ());
+      t(950, () => send('TIME_SET', Math.floor(Date.now() / 1000)));
+      t(1100, () => sendRaw('SAVE'));
+      showSavedBtn('bsvDisplay');
+    }
+
+    function saveAlarms() {
+      const t = (ms, fn) => setTimeout(fn, ms);
+      t(0, () => setAlarm());
+      t(150, () => send('TIMER_SET', g('tmr').value));
+      t(300, () => sendRaw('SAVE'));
+      showSavedBtn('bsvAlarm');
+    }
+
+    function saveSound() {
+      const t = (ms, fn) => setTimeout(fn, ms);
+      t(0, () => send('SOUND', g('snd').checked ? 1 : 0));
+      t(150, () => send('CHIME', g('chm').checked ? 1 : 0));
+      t(300, () => send('WATER', g('wtr').checked ? 1 : 0));
+      t(450, () => sendRaw('SAVE'));
+      showSavedBtn('bsvSound');
+    }
+
+    function saveSettingsTab() {
+      const t = (ms, fn) => setTimeout(fn, ms);
+      t(0, () => send('LED_ON', g('lOn').checked ? 1 : 0));
+      t(150, () => send('LED_BRIGHT', _lb));
+      t(300, () => send('LED_FX', g('lFx').value));
+      t(450, () => send('BOOT1', g('bt1').value));
+      t(600, () => send('BOOT2', g('bt2').value));
+      t(750, () => send('BOOT3', g('bt3').value));
+      t(900, () => send('BOOT4', g('bt4').value));
+      t(1050, () => send('BTFLAGS', getBootFlags()));
+      t(1200, () => sendRaw('SAVE'));
+      showSavedBtn('bsvSettings');
+    }
+
+    function setHomeTZ() {
+      const val = g('tz-home').value;
+      const offset = val.split(',')[1];
+      send('HOME_TZ_SET', offset);
+    }
+
+    function getBootFlags() {
+      let flags = 0;
+      if (g('bt-l1').checked) flags |= 0x01;
+      if (g('bt-l2').checked) flags |= 0x02;
+      if (g('bt-l3').checked) flags |= 0x04;
+      if (g('bt-l4').checked) flags |= 0x08;
+      if (g('bt-gears').checked) flags |= 0x10;
+      if (g('bt-power').checked) flags |= 0x20;
+      if (g('bt-rocket').checked) flags |= 0x40;
+      return flags;
+    }
+
+    function setBootFlags(flags) {
+      g('bt-l1').checked = !!(flags & 0x01);
+      g('bt-l2').checked = !!(flags & 0x02);
+      g('bt-l3').checked = !!(flags & 0x04);
+      g('bt-l4').checked = !!(flags & 0x08);
+      g('bt-gears').checked = !!(flags & 0x10);
+      g('bt-power').checked = !!(flags & 0x20);
+      g('bt-rocket').checked = !!(flags & 0x40);
+    }
+
+    // Throttled sliders
+    const _t = {}; const deb = (fn, ms, k) => { clearTimeout(_t[k]); _t[k] = setTimeout(fn, ms); };
+    function updEye() { deb(() => send('EYE', g('px').value + ',' + g('py').value), 50, 'e'); }
+    function updPos() { deb(() => send('EYE_POS', g('ex').value + ',' + g('ey').value), 100, 'p'); }
+    function updSz() { deb(() => send('EYE_SIZE', g('ew').value + ',' + g('eh').value), 100, 's'); }
+    function updR() { deb(() => send('EYE_RADIUS', g('er').value), 100, 'r'); }
+
+    // Theme Selector
+    function changeTheme(theme) {
+      document.documentElement.classList.remove('theme-blue', 'theme-bw');
+      if (theme === 'blue') {
+        document.documentElement.classList.add('theme-blue');
+      } else if (theme === 'bw') {
+        document.documentElement.classList.add('theme-bw');
+      }
+      localStorage.setItem('bobo-theme', theme);
+      const sel = g('theme-select');
+      if (sel) sel.value = theme;
+    }
+
+    // Load saved theme selector value
+    const savedTheme = localStorage.getItem('bobo-theme') || 'amber';
+    const selSelector = g('theme-select');
+    if (selSelector) selSelector.value = savedTheme;
+
+    // Init
+    setLBui(3);
+  </script>
 </body>
+
 </html>
